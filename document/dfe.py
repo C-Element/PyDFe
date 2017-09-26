@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import datetime, date
 from decimal import Decimal
 from typing import Dict, List
@@ -14,41 +15,90 @@ class DocumentoInvalido(Exception):
 
 # classes DFe
 class BaseObjDFe(object):
-    def __init__(self):
-        self._foi_preenchido = False
+    def __init__(self, dado: OrderedDict):
+        self._conteudo_xml: OrderedDict = dado
+        self._preencher()
 
-    @property
-    def foi_preenchido(self):
-        return self._foi_preenchido
-
-    @foi_preenchido.setter
-    def foi_preenchido(self, value):
-        if isinstance(value, bool):
-            self._foi_preenchido = value
+    def _preencher(self) -> None:
+        pass
 
 
 class Cobranca(BaseObjDFe):  # [#Y01]
-    fatura: Fatura = Fatura()  # :: <fat> [#Y02]
+    duplicatas: ListaDuplicatas = []  # :: <dup> [#Y07]
+    fatura: Fatura = None  # :: <fat> [#Y02]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self) -> None:
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'dup':
+                if isinstance(valor, list):
+                    for dup in valor:
+                        duplicata = Duplicata(dup)
+                        self.duplicatas.append(duplicata)
+                else:
+                    duplicata = Duplicata(valor)
+                    self.duplicatas.append(duplicata)
+            elif chave == 'fat':
+                self.fatura = Fatura(valor)
 
 
 class COFINS(BaseObjDFe):  # {#S01}
-    cofins_aliq: COFINSAliquota = COFINSAliquota()  # Grupo COFINS tributado pela alíquota  :: <COFINSAliq> [#S02]
-    confins_nao_tributado: COFINSNaoTributado = COFINSNaoTributado()  # Grupo COFINS não tributado :: <COFINSNT> [#S04]
-    cofins_outros: COFINSOutros = COFINSOutros()  # Grupo COFINS Outras Operações :: <COFINSOutr> [#S05]
-    cofins_quantidade: COFINSQuantidade = COFINSQuantidade()  # Grupo de COFINS tributado por Qtde  :: <COFINSQtde> [#S03]
+    cofins_aliq: COFINSAliquota = None  # Grupo COFINS tributado pela alíquota  :: <COFINSAliq> [#S02]
+    cofins_nao_tributado: COFINSNaoTributado = None  # Grupo COFINS não tributado :: <COFINSNT> [#S04]
+    cofins_outros: COFINSOutros = None  # Grupo COFINS Outras Operações :: <COFINSOutr> [#S05]
+    cofins_quantidade: COFINSQuantidade = None  # Grupo de COFINS tributado por Qtde  :: <COFINSQtde> [#S03]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'COFINSAliq':
+                self.cofins_aliq = COFINSAliquota(valor)
+            elif chave == 'COFINSNT':
+                self.cofins_nao_tributado = COFINSNaoTributado(valor)
+            elif chave == 'COFINSOutr':
+                self.cofins_outros = COFINSOutros(valor)
+            elif chave == 'COFINSQtde':
+                self.cofins_quantidade = COFINSQuantidade(valor)
 
 
 class COFINSAliquota(BaseObjDFe):  # {#S02}
     aliquota: Decimal = Decimal()  # <pCOFINS> [#S08]
     cst: int = int()  # 01=Operação Tributável (base de cálculo = valor da operação alíquota normal (cumulativo/não cumulativo)); 02=Operação Tributável
     # (base de cálculo = valor da operação (alíquota diferenciada)); :: <CST> [#S06]
-    valor_base_calculo: Decimal = Decimal()  # <vBC> [#S07]
     valor: Decimal = Decimal()  # <vCOFINS> [#S11]
+    valor_base_calculo: Decimal = Decimal()  # <vBC> [#S07]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'pCOFINS':
+                self.aliquota = Decimal(valor)
+            elif chave == 'CST':
+                self.cst = int(valor)
+            elif chave == 'vCOFINS':
+                self.valor = Decimal(valor)
+            elif chave == 'vBC':
+                self.valor_base_calculo = Decimal(valor)
 
 
 class COFINSNaoTributado(BaseObjDFe):  # {#S04}
     cst: int = int()  # 04=Operação Tributável (tributação monofásica (alíquota zero)); 05=Operação Tributável (Substituição Tributária); 06=Operação Tributável
+
     # (alíquota zero); 07=Operação Isenta da Contribuição;08=Operação Sem Incidência da Contribuição;09=Operação com Suspensão da Contribuição;  :: <CST> [#S06]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'CST':
+                self.cst = int(valor)
 
 
 class COFINSOutros(COFINSAliquota):  # {#S05}
@@ -68,6 +118,19 @@ class COFINSOutros(COFINSAliquota):  # {#S05}
     quantidade_base_calculo: Decimal = Decimal()  # <qBCProd> [#Q10]
     valor_aliquota: Decimal = Decimal()  # <vAliqProd> [#Q11]
 
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        super()._preencher()
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'CST':
+                self.cst = int(valor)
+            elif chave == 'qBCProd':
+                self.quantidade_base_calculo = Decimal(valor)
+            if chave == 'vAliqProd':
+                self.valor_aliquota = Decimal(valor)
+
 
 class COFINSQuantidade(BaseObjDFe):  # {#S03}
     cst: int = int()  # 03=Operação Tributável (base de cálculo = quantidade vendida x alíquota por unidade de produto); :: <CST> [#S06]
@@ -75,9 +138,24 @@ class COFINSQuantidade(BaseObjDFe):  # {#S03}
     valor_aliquota: Decimal = Decimal()  # <vAliqProd> [#S10]
     valor: Decimal = Decimal()  # <vCOFINS> [#S11]
 
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'CST':
+                self.cst = int(valor)
+            elif chave == 'qBCProd':
+                self.quantidade_base_calculo = Decimal(valor)
+            elif chave == 'vAliqProd':
+                self.valor_aliquota = Decimal(valor)
+            elif chave == 'vCOFINS':
+                self.valor = Decimal(valor)
+
 
 class COFINSST(COFINSOutros):  # [#T01]
-    cst: None = None  # Nessa classe não existe CST
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
 
 
 class Destinatario(BaseObjDFe):  # [#E01]
@@ -94,8 +172,34 @@ class Destinatario(BaseObjDFe):  # [#E01]
     # destinatário. :: <indIEDest> [#E16a]
     inscricao_estadual: str = str()  # :: <IE> [#E17]
     inscricao_suframa: str = str()  # :: <ISUF> [#E18]
-    endereco = Endereco()  # :: <enderDest> [#E05]
+    endereco: Endereco = None  # :: <enderDest> [#E05]
     razao_social: str = str()  # Razão Sócial ou Nome do destinatário :: <xNome> [#E04]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'CNPJ':
+                self.cnpj = int(valor)
+            elif chave == 'CPF':
+                self.cpf = int(valor)
+            elif chave == 'email':
+                self.email = valor
+            elif chave == 'idEstrangeiro':
+                self.id_estrangeiro = valor
+            elif chave == 'IM':
+                self.inscricao_municipal_tomador_servico = valor
+            elif chave == 'indIEDest':
+                self.indicador_inscricao_estadual = int(valor)
+            elif chave == 'IE':
+                self.inscricao_estadual = valor
+            elif chave == 'ISUF':
+                self.inscricao_suframa = valor
+            elif chave == 'enderDest':
+                self.endereco = Endereco(valor)
+            elif chave == 'xNome':
+                self.razao_social = valor
 
 
 class Detalhamento(BaseObjDFe):  # [#H01]
@@ -162,7 +266,6 @@ class EntregaRetirada(BaseObjDFe):  # [#F01]
 
 
 class Fatura(BaseObjDFe):  # [#Y02]
-    ducplicatas: ListaDuplicatas = []  # :: <dup> [#Y07]
     numero: str = str()  # :: <nFat> [#Y03]
     valor_desconto: Decimal = Decimal()  # :: <vDec> [#Y05]
     valor_liquido: Decimal = Decimal()  # :: <vLiq> [#Y06]
