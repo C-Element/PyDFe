@@ -203,18 +203,48 @@ class Destinatario(BaseObjDFe):  # [#E01]
 
 
 class Detalhamento(BaseObjDFe):  # [#H01]
-    imposto: Imposto = Imposto()  # Tributos incidentes no Produto ou Serviço. :: <impost> [#M01]
+    imposto: Imposto = None  # Tributos incidentes no Produto ou Serviço. :: <impost> [#M01]
     informacoes_adicionais: str = str()  # Informações Adicionais :: <infAdProd> [#V01]
     numero_item: int = int()  # Número do item :: @nItem [#H02]
-    produto: Produto = Produto()  # Detalhamento de Produtos e Serviços :: <prod> [#I01]
-    tributos_devolvidos: TributoDevolvido = TributoDevolvido()  # Informação do Imposto devolvido :: <impostoDevol> [#UA01]
+    produto: Produto = None  # Detalhamento de Produtos e Serviços :: <prod> [#I01]
+    tributos_devolvidos: TributoDevolvido = None  # Informação do Imposto devolvido :: <impostoDevol> [#UA01]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'impost':
+                self.imposto = Imposto(valor)
+            elif chave == 'infAdProd':
+                self.informacoes_adicionais = valor
+            elif chave == '@nItem':
+                self.numero_item = int(valor)
+            elif chave == 'prod':
+                self.produto = Produto(valor)
+            elif chave == 'importDevol':
+                self.tributos_devolvidos = TributoDevolvido(valor)
 
 
 class DocumentoReferenciado(BaseObjDFe):  # [#BA01]
     chave_nfe_ref: int = int()  # Chave de acesso da NF-e referenciada :: <refNFe> [#BA02]
-    informacao_nfe_ref: NFeReferenciada = NFeReferenciada()  # Informação da NF modelo 1/1A referenciada :: <refNF> [#BA03]
-    informacao_nfe_pr_ref: NFeReferenciadaProdutoRural = NFeReferenciadaProdutoRural()  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
-    informacao_ecf_ref: ECFReferenciado = ECFReferenciado()  # Informações do Cupom Fiscal referenciado :: <refECF> [#BA20]
+    informacao_nfe_ref: NFeReferenciada = None  # Informação da NF modelo 1/1A referenciada :: <refNF> [#BA03]
+    informacao_nfe_pr_ref: NFeReferenciadaProdutoRural = None  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
+    informacao_ecf_ref: ECFReferenciado = None  # Informações do Cupom Fiscal referenciado :: <refECF> [#BA20]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'refNFe':
+                self.chave_nfe_ref = int(valor)
+            elif chave == 'refNF':
+                self.informacao_nfe_ref = NFeReferenciada(valor)
+            elif chave == 'refNFP':
+                self.informacao_nfe_pr_ref = NFeReferenciadaProdutoRural(valor)
+            elif chave == 'refECF':
+                self.informacao_ecf_ref = ECFReferenciado(valor)
 
 
 class Duplicata(BaseObjDFe):  # [#Y07]
@@ -222,21 +252,65 @@ class Duplicata(BaseObjDFe):  # [#Y07]
     valor: Decimal = Decimal()  # :: <vDup> [#Y10]
     vencimento: date = None  # :: <dVenc> [#Y09]
 
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'nDup':
+                self.numero = valor
+            elif chave == 'vDup':
+                self.valor = Decimal(valor)
+            elif chave == 'dVenc':
+                self.vencimento = ler_data(valor)
+
 
 class ECFReferenciado(BaseObjDFe):  # [#BA20]
     modelo: int = int()  # Modelo do cupom fiscal :: <mod> [#BA21]
     numero_coo: int = int()  # Número do Contador de Ordem de Operação - COO :: <nCOO> [#BA23]
     numero_ecf: int = int()  # Número de ordem sequencial do ECF :: <nECF> [#BA22]
 
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'mod':
+                self.modelo = int(valor)
+            elif chave == 'nCOO':
+                self.numero_coo = int(valor)
+            elif chave == 'nECF':
+                self.numero_ecf = int(valor)
+
 
 class Emitente(BaseObjDFe):  # [#C01]
     cnpj: int = int()  # :: <CNPJ> [#C02]
     cpf: int = int()  # :: <CPF> [#C02a]
-    endereco = Endereco()  # :: <enderEmit> [#C05]
+    endereco = None  # :: <enderEmit> [#C05]
     fantasia: str = str()  # Nome Fantasia do emitente :: <xFant> [#C04]
     inscricao_estadual: str = str()  #:: <IE> [#C17]
     inscricao_estadual_st: str = str()  #:: <IEST> [#C18]
     razao_social: str = str()  # Razão Sócial ou Nome do emitente :: <xNome> [#C03]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'CNPJ':
+                self.cnpj = int(valor)
+            elif chave == 'CPF':
+                self.cpf = int(valor)
+            elif chave == 'enderEmit':
+                self.endereco = Endereco(valor)
+            elif chave == 'xFant':
+                self.fantasia = valor
+            elif chave == 'IE':
+                self.inscricao_estadual = valor
+            elif chave == 'IEST':
+                self.inscricao_estadual_st = valor
+            elif chave == 'xNome':
+                self.razao_social = valor
 
 
 class Endereco(BaseObjDFe):  # [#C05]
@@ -247,10 +321,38 @@ class Endereco(BaseObjDFe):  # [#C05]
     complemento: str = str()  # :: <xCpl> [#C08] [#E08]
     logradouro: str = str()  # :: <xLgr> [#C06] [#E06]
     municipio: str = str()  # :: <xMun> [#C11] [#E11]
-    nro: str = str()  # :: <nro> [#C07] [#E07]
+    numero: str = str()  # :: <nro> [#C07] [#E07]
     pais: str = str()  # :: <xPais> [#C15] [#E15]
     telefone: int = int()  # :: <fone> [#C16] [#E16]
     uf: str = str()  # :: <UF> [#C12] [#E12]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'xBairro':
+                self.bairro = valor
+            elif chave == 'CEP':
+                self.cep = int(valor)
+            elif chave == 'cMun':
+                self.codigo_municipio = int(valor)
+            elif chave == 'cPais':
+                self.codigo_pais = int(valor)
+            elif chave == 'xCpl':
+                self.complemento = valor
+            elif chave == 'xLgr':
+                self.logradouro = valor
+            elif chave == 'xMun':
+                self.municipio = valor
+            elif chave == 'nro':
+                self.numero = valor
+            elif chave == 'xPais':
+                self.pais = valor
+            elif chave == 'fone':
+                self.telefone = int(valor)
+            elif chave == 'UF':
+                self.uf = valor
 
 
 class EntregaRetirada(BaseObjDFe):  # [#F01]
@@ -261,31 +363,98 @@ class EntregaRetirada(BaseObjDFe):  # [#F01]
     complemento: str = str()  # :: <xCpl> [#F05]
     logradouro: str = str()  # :: <xLgr> [#F03]
     municipio: str = str()  # :: <xMun> [#F08]
-    nro: str = str()  # :: <nro> [#F04]
+    numero: str = str()  # :: <nro> [#F04]
     uf: str = str()  # :: <UF> [#F09]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'xBairro':
+                self.bairro = valor
+            elif chave == 'CNPJ':
+                self.cnpj = int(valor)
+            elif chave == 'CPF':
+                self.cpf = int(valor)
+            elif chave == 'cMun':
+                self.codigo_municipio = int(valor)
+            elif chave == 'xCpl':
+                self.complemento = valor
+            elif chave == 'xLgr':
+                self.logradouro = valor
+            elif chave == 'xMun':
+                self.municipio = valor
+            elif chave == 'nro':
+                self.numero = valor
+            elif chave == 'UF':
+                self.uf = valor
 
 
 class Fatura(BaseObjDFe):  # [#Y02]
     numero: str = str()  # :: <nFat> [#Y03]
-    valor_desconto: Decimal = Decimal()  # :: <vDec> [#Y05]
+    valor_desconto: Decimal = Decimal()  # :: <vDesc> [#Y05]
     valor_liquido: Decimal = Decimal()  # :: <vLiq> [#Y06]
     valor_original: Decimal = Decimal()  # :: <vOrig> [#Y04]
 
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'nFat':
+                self.numero = valor
+            elif chave == 'vDesc':
+                self.valor_desconto = Decimal(valor)
+            elif chave == 'vLiq':
+                self.valor_liquido = Decimal(valor)
+            elif chave == 'vOrig':
+                self.valor_original = Decimal(valor)
+
 
 class ICMS(BaseObjDFe):  # [#N01]
-    icms00: ICMS00 = ICMS00()  # Tributada integralmente. :: <ICMS00> [#N02]
-    icms10: ICMS10 = ICMS10()  # Tributada e com cobrança do ICMS por substituição tributária. :: <ICMS10> [#N03]
-    icms20: ICMS20 = ICMS20()  # Tributação com redução de base de cálculo. :: <ICMS20> [#N04]
-    icms30: ICMS30 = ICMS30()  # Tributação Isenta ou não tributada e com cobrança do ICMS por substituição tributária. :: <ICMS30> [#N05]
-    icms4050: ICMS4050 = ICMS4050()  # Tributação Isenta, Não tributada ou Suspensão. :: <ICMS40> <ICMS41> <ICMS50> [#N06]
-    icms51: ICMS51 = ICMS51()  # Tributação com Diferimento (a exigência do preenchimento das informações do ICMS diferido fica a critério de cada
+    # icms00: ICMS00 = ICMS00()  # Tributada integralmente. :: <ICMS00> [#N02]
+    # icms10: ICMS10 = ICMS10()  # Tributada e com cobrança do ICMS por substituição tributária. :: <ICMS10> [#N03]
+    # icms20: ICMS20 = ICMS20()  # Tributação com redução de base de cálculo. :: <ICMS20> [#N04]
+    # icms30: ICMS30 = ICMS30()  # Tributação Isenta ou não tributada e com cobrança do ICMS por substituição tributária. :: <ICMS30> [#N05]
+    # icms4050: ICMS4050 = ICMS4050()  # Tributação Isenta, Não tributada ou Suspensão. :: <ICMS40> <ICMS41> <ICMS50> [#N06]
+    # icms51: ICMS51 = ICMS51()  # Tributação com Diferimento (a exigência do preenchimento das informações do ICMS diferido fica a critério de cada
     # UF). :: <ICMS51> [#N07]
-    icms60: ICMS60 = ICMS60()  # Tributação ICMS cobrado anteriormente por substituição tributária. :: <ICMS60> [#N08]
-    icms70: ICMS7090 = ICMS7090()  # Tributação ICMS com redução de base de cálculo e cobrança do ICMS por substituição tributária. :: <ICMS70> <ICMS90> [#N09]
-    icms_partilha: ICMSPartilha = ICMSPartilha()  # Operação interestadual para consumidor final com partilha do ICMS devido na operação entre a UF de origem
+    # icms60: ICMS60 = ICMS60()  # Tributação ICMS cobrado anteriormente por substituição tributária. :: <ICMS60> [#N08]
+    # icms70: ICMS7090 = ICMS7090()  # Tributação ICMS com redução de base de cálculo e cobrança do ICMS por substituição
+    # tributária. :: <ICMS70> <ICMS90> [#N09]
+    icms = None  # Pode ser qualquer um dos tipos acima
+    icms_partilha: ICMSPartilha = None  # Operação interestadual para consumidor final com partilha do ICMS devido na operação entre a UF de origem
     # e a do destinatário, ou a UF definida na legislação. :: <ICMSPart> [#N10a]
-    icms_st: ICMSST = ICMSST()  # Grupo de informação do ICMS ST devido para a UF de destino, nas operações interestaduais de produtos que tiveram retenção
-    # antecipada de ICMS por ST na UF do remetente. Repasse via Substituto Tributário. . :: <ICMSPart> [#N10b]
+    icms_st: ICMSST = None  # Grupo de informação do ICMS ST devido para a UF de destino, nas operações interestaduais de produtos que tiveram retenção
+
+    # antecipada de ICMS por ST na UF do remetente. Repasse via Substituto Tributário. . :: <ICMSST> [#N10b]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'ICMS00':
+                self.icms = ICMS00(valor)
+            elif chave == 'ICMS10':
+                self.icms = ICMS10(valor)
+            elif chave == 'ICMS20':
+                self.icms = ICMS20(valor)
+            elif chave == 'ICMS30':
+                self.icms = ICMS30(valor)
+            elif chave in ('ICMS40', 'ICMS41', 'ICMS50'):
+                self.icms = ICMS4050(valor)
+            elif chave == 'ICMS51':
+                self.icms = ICMS51(valor)
+            elif chave == 'ICMS60':
+                self.icms = ICMS60(valor)
+            elif chave in ('ICMS70', 'ICMS90'):
+                self.icms = ICMS7090(valor)
+            elif chave == 'ICMSPart':
+                self.icms_partilha = ICMSPartilha(valor)
+            elif chave == 'ICMSST':
+                self.icms_st = ICMSST(valor)
 
 
 class ICMS00(BaseObjDFe):  # [#N02]
@@ -297,9 +466,25 @@ class ICMS00(BaseObjDFe):  # [#N02]
     # Importação superior a 40% e inferior ou igual a 70%; 4 - Nacional, cuja produção tenha sido feita em conformidade com os processos produtivos básicos de
     # que tratam as legislações citadas nos Ajustes; 5 - Nacional, mercadoria ou bem com Conteúdo de Importação inferior ou igual a 40%; 6 - Estrangeira -
     # Importação direta, sem similar nacional, constante em lista da CAMEX e gás natural; 7 - Estrangeira - Adquirida no mercado interno, sem similar nacional,
-    # constante lista CAMEX e gás natural. 8 - Nacional, mercadoria ou bem com Conteúdo de Importação superior a 70%; :: <ICMS00> [#N11]
+    # constante lista CAMEX e gás natural. 8 - Nacional, mercadoria ou bem com Conteúdo de Importação superior a 70%; :: <orig> [#N11]
     valor_base_calculo: Decimal = Decimal()  # :: <vBC> [#N15]
-    valor_icms: Decimal = Decimal()  # :: <vlICMS> [#N17]
+    valor_icms: Decimal = Decimal()  # :: <vICMS> [#N17]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'pICMS':
+                self.aliquota = Decimal(valor)
+            elif chave == 'CST':
+                self.cst = int(valor)
+            elif chave == 'orig':
+                self.origem = int(valor)
+            elif chave == 'vBC':
+                self.valor_base_calculo = Decimal(valor)
+            elif chave == 'vICMS':
+                self.valor_icms = Decimal(valor)
 
 
 class ICMS10(ICMS00):  # [#N03]
@@ -310,7 +495,26 @@ class ICMS10(ICMS00):  # [#N03]
     mva_st: Decimal = Decimal()  # Percentual da margem de valor Adicionado do ICMS ST :: <pMVAST> [#N19]
     reducao_base_calculo_st: Decimal = Decimal()  # Percentual da Redução de BC do ICMS ST :: <pRedBCST> [#N20]
     valor_base_calculo_st: Decimal = Decimal()  # :: <vBCST> [#N21]
-    valor_icms_st: Decimal = Decimal()  # :: <vlICMSST> [#N23]
+    valor_icms_st: Decimal = Decimal()  # :: <vICMSST> [#N23]
+
+    def __init__(self, dado: OrderedDict):
+        super().__init__(dado)
+
+    def _preencher(self):
+        super()._preencher()
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'pICMSST':
+                self.aliquota_st = Decimal(valor)
+            elif chave == 'modBCST':
+                self.modalidade_base_calculo_st = int(valor)
+            elif chave == 'pMVAST':
+                self.mva_st = Decimal(valor)
+            elif chave == 'pRedBCST':
+                self.reducao_base_calculo_st = Decimal(valor)
+            elif chave == 'vBCST':
+                self.valor_base_calculo_st = Decimal(valor)
+            elif chave == 'vICMSST':
+                self.valor_icms_st = Decimal(valor)
 
 
 class ICMS20(ICMS00):  # [#N04]
@@ -742,6 +946,7 @@ class VolumeLacre(BaseObjDFe):  # [#X33]
     numero: str = str()  # :: <nLacre> [#X4]
 
 
+# Tipos
 DetalhesProduto = Dict[int, Detalhamento]
 ListaDuplicatas = List[Duplicata]
 ListaLacres = List[VolumeLacre]
@@ -749,3 +954,13 @@ ListaObservacoesContribuinte = List[ObservacaoContribuinte]
 ListaObservacoesFisco = List[ObservacaoFisco]
 ListaTransporteReboques = List[TransporteReboque]
 ListaTransporteVolumes = List[TransporteReboque]
+
+
+# funções
+
+def ler_data(texto: str) -> date:
+    return datetime.strptime(texto, '%Y-%m-%d').date()
+
+
+def ler_data_hora(texto: str) -> datetime:
+    return datetime.strptime(texto[:22] + texto[23:], '%Y-%m-%dT%H:%M:%S%z')

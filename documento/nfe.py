@@ -5,7 +5,7 @@ from datetime import datetime
 
 from decimal import Decimal
 
-from document.dfe import DestinatarioEmitente, ErroDeInicializacao, DocumentoInvalido, InfNFe
+from documento.dfe import DestinatarioEmitente, ErroDeInicializacao, DocumentoInvalido, InfNFe
 
 
 class NFe(object):
