@@ -9,4 +9,4 @@ def f_dma(data: date):
 
 
 def f_moeda(valor: Decimal):
-    return f'R$ {valor:,.2f}'
+    return f'R$ {valor:,.2f}'.replace('.', '*').replace(',', '.').replace('*', ',')
