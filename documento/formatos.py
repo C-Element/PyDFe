@@ -17,6 +17,8 @@ def f_int_milhar(valor: int) -> str:
 
 
 def f_fone(texto: str) -> str:
+    if not isinstance(texto, str):
+        texto = str(texto)
     if len(texto) == 8:
         return f'{texto[0:4]}-{texto[4:]}'
     elif len(texto) == 9:
@@ -25,4 +27,12 @@ def f_fone(texto: str) -> str:
         return f'({texto[0:2]}) {texto[2:6]}-{texto[6:]}'
     elif len(texto) == 11:
         return f'({texto[0:2]}) {texto[2:7]}-{texto[7:]}'
+    return ''
+
+
+def f_cep(texto: str) -> str:
+    if not isinstance(texto, str):
+        texto = str(texto)
+    if len(texto) == 8:
+        return f'{texto[0:2]}.{texto[2:5]}-{texto[5:]}'
     return ''
