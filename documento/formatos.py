@@ -36,3 +36,15 @@ def f_cep(texto: str) -> str:
     if len(texto) == 8:
         return f'{texto[0:2]}.{texto[2:5]}-{texto[5:]}'
     return ''
+
+
+def f_espaco_a_cada(texto: str, parada: int) -> str:
+    retorno = ''
+    contador = 0
+    for x in texto:
+        retorno += x
+        contador += 1
+        if contador == parada:
+            retorno += ' '
+            contador = 0
+    return retorno
