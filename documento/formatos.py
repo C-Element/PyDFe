@@ -1,11 +1,24 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
-_data_dma = '%d/%m/%Y'
+
+def encher(texto: str, caractere: str, tamanho: int, na_frente: bool = True) -> str:
+    if not isinstance(texto, str):
+        texto = str(texto)
+    while len(texto) < tamanho:
+        if na_frente:
+            texto = caractere + texto
+        else:
+            texto += caractere
+    return texto
 
 
 def f_dma(data: date) -> str:
-    return data.strftime(_data_dma)
+    return data.strftime('%d/%m/%Y')
+
+
+def f_dmah(data: datetime) -> str:
+    return data.strftime('%d/%m/%Y %H:%M:%S')
 
 
 def f_moeda(valor: Decimal) -> str:
