@@ -2,21 +2,26 @@ from collections import OrderedDict
 
 from xmltodict import parse as x2d_parse
 
+from documento.dfe import ler_data_hora
+from documento.formatos import f_cnpj, f_cpf, f_hora
 from .DFePDF import FontePDF, DFePDF
 from .dfe import InfNFe, Endereco
-from .formatos import f_dma, f_moeda, f_int_milhar, f_cep, f_fone, f_espaco_a_cada
+from .formatos import f_dma, f_dmah, f_moeda, f_int_milhar, f_cep, f_fone, f_espaco_a_cada
 
 
-def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bool = False, com_cidade: bool = True, com_fone: bool = False) -> str:
+def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bool = False, com_cidade: bool = True, com_fone: bool = False,
+                       com_bairro: bool = True) -> str:
     retorno = ''
 
-    def se_tem():
+    def se_tem(texto: str = ' - '):
         if len(retorno) > 0:
-            return ' - '
+            return texto
         return ''
 
     if com_endereco:
-        retorno += f'{obj_end.logradouro}, {obj_end.numero} - {obj_end.complemento}, {obj_end.bairro}'
+        retorno += f'{obj_end.logradouro}, {obj_end.numero} - {obj_end.complemento}'
+    if com_bairro:
+        retorno += se_tem(', ') + f'{obj_end.bairro}'
     if com_cep:
         retorno += se_tem() + f'{f_cep(obj_end.cep)}'
     if com_cidade:
@@ -30,6 +35,8 @@ class NFe(object):
     def __init__(self, conteudo_xml: str):
         self.infNFe: InfNFe = None
         self.conteudo_xml: str = conteudo_xml
+        self.protocolo = ''
+        self.data_recebimento = None
         self.preencher()
 
     def preencher(self) -> None:
@@ -44,11 +51,25 @@ class NFe(object):
         for chave, valor in dado.items():
             if chave == 'NFe':
                 self.preencher_nfe(valor)
+            if chave == 'protNFe':
+                self.preencher_prot_nfe(valor)
 
     def preencher_nfe(self, dado: OrderedDict) -> None:
         for chave, valor in dado.items():
             if chave == 'infNFe':
                 self.infNFe = InfNFe(valor)
+
+    def preencher_prot_nfe(self, dado: OrderedDict) -> None:
+        for chave, valor in dado.items():
+            if chave == 'infProt':
+                self.preencher_inf_prot(valor)
+
+    def preencher_inf_prot(self, dado: OrderedDict) -> None:
+        for chave, valor in dado.items():
+            if chave == 'nProt':
+                self.protocolo = valor
+            elif chave == 'dhRecbto':
+                self.data_recebimento = ler_data_hora(valor)
 
     def gerar_pdf(self, caminho: str):
         danfe = DANFe(self)
@@ -59,6 +80,9 @@ class DANFe(DFePDF):
     def __init__(self, nfe: NFe):
         super().__init__()
         self.nfe = nfe.infNFe
+        self.protocolo = nfe.protocolo
+        self.data_recebimento = nfe.data_recebimento
+        self.debugNFe = nfe
 
     def canhoto(self) -> int:
         destinatario = f'{self.nfe.destinatario.razao_social} - {construir_endereco(self.nfe.destinatario.endereco)}'
@@ -93,11 +117,11 @@ class DANFe(DFePDF):
         self.caixa_de_texto(self.x + x, y, x2, a_cabecalho)
         self.caixa_de_texto(self.x + x + x2, y, largura_ult_caixa, a_cabecalho)
         tamanho = self.font_size
-        posicao_y = posicao_y + self.caixa_de_texto(self.x, y, x, tamanho, "IDENTIFICAÇÃO DO EMITENTE", fonte, 'T', 'C', False) + 2
+        posicao_y += self.caixa_de_texto(self.x, y, x, tamanho, "IDENTIFICAÇÃO DO EMITENTE", fonte, 'T', 'C', False) + 2
         fonte.tamanho = 12
         fonte.estilo = 'B'
-        posicao_y = posicao_y + self.caixa_de_texto(self.x, posicao_y, x, 12, f'{self.nfe.emitente.razao_social} - {self.nfe.emitente.fantasia}', fonte, 'T',
-                                                    'C', False) + 2
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, x, 12, f'{self.nfe.emitente.razao_social} - {self.nfe.emitente.fantasia}', fonte, 'T',
+                                         'C', False) + 2
         fonte.tamanho = 8
         fonte.estilo = ''
         ender = f'{construir_endereco(self.nfe.emitente.endereco, com_cep=True, com_cidade=False)}\n' \
@@ -110,16 +134,16 @@ class DANFe(DFePDF):
         fonte.tamanho = 10
         fonte.estilo = ''
         entrada = '1 - ENTRADA'
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, x2, 12, 'Documento Auxiliar da Nota Fiscal Eletrônica', fonte, 'T', 'C', False) + 2
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, 'Documento Auxiliar da Nota Fiscal Eletrônica', fonte, 'T', 'C', False) + 2
         a_quad = self.caixa_de_texto(posicao_x + 2, posicao_y, x2, 12, f'{entrada}\n2 - SAÍDA', fonte, 'T', 'L', False)
         fonte.tamanho = 12
         fonte.estilo = 'B'
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x + self.get_string_width(entrada) + 7, posicao_y , self.get_string_width('0000'), a_quad,
-                                                    str(self.nfe.ide.tipo_nf), fonte, 'C', 'C') + 2
+        posicao_y += self.caixa_de_texto(posicao_x + self.get_string_width(entrada) + 7, posicao_y, self.get_string_width('0000'), a_quad,
+                                         str(self.nfe.ide.tipo_nf), fonte, 'C', 'C') + 2
         fonte.tamanho = 10
         fonte.estilo = 'B'
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'{f_int_milhar(self.nfe.ide.nf)}', fonte, 'T', 'C', False)
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'SÉRIE {self.nfe.ide.serie}', fonte, 'T', 'C', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'{f_int_milhar(self.nfe.ide.nf)}', fonte, 'T', 'C', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'SÉRIE {self.nfe.ide.serie}', fonte, 'T', 'C', False)
         self.caixa_de_texto(posicao_x + 2, posicao_y, x2, 12, f'FOLHA {self.page_no()}/{{nb}}', fonte, 'T', 'C', False)
         posicao_x += x2
         b_largura = largura_ult_caixa - 4
@@ -130,12 +154,248 @@ class DANFe(DFePDF):
         fonte.estilo = ''
         posicao_y = y + 16
         self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, '', fonte, 'T', 'L')
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f'CHAVE DE ACESSO', fonte, 'T', 'L', False) + 1
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f'CHAVE DE ACESSO', fonte, 'T', 'L', False) + 1
         fonte.tamanho = 9
         fonte.estilo = 'B'
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False) + 3
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False) + 3
         fonte.tamanho = 8
         fonte.estilo = ''
-        posicao_y = posicao_y + self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8,
-                                                    'Consulta de autenticidade no portal nacional da NF-e \nwww.nfe.fazenda.gov.br/portal ou no site da Sefaz '
-                                                    'Autorizadora', fonte, 'T', 'C', False)
+        self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8,
+                            'Consulta de autenticidade no portal nacional da NF-e \nwww.nfe.fazenda.gov.br/portal ou no site da Sefaz Autorizadora', fonte,
+                            'T', 'C', False)
+        fonte.tamanho = 6
+        posicao_y = y + a_cabecalho
+        largura_ult_caixa = round(x * 0.85)
+        largura_pri_caixa = self.largura_max - largura_ult_caixa
+        largura_ult_caixa -= self.x
+        self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, 'NATUREZA DA OPERAÇÃO', fonte)
+        self.caixa_de_texto(self.x + largura_pri_caixa, posicao_y, largura_ult_caixa, 6, 'PROTOCOLO DE AUTORIZAÇÃO DE USO', fonte)
+        fonte.tamanho = 9
+        fonte.estilo = 'B'
+        y_temp = posicao_y
+        posicao_y += 0.5 + self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.ide.natureza_operacao, fonte, 'B', 'L', False)
+        if self.protocolo and self.data_recebimento:
+            self.caixa_de_texto(self.x + largura_pri_caixa, y_temp, largura_ult_caixa, 6, f'{self.protocolo} - {f_dmah(self.data_recebimento)}', fonte, 'B',
+                                'L', False)
+        largura_pri_caixa = round(self.largura_max * 0.33) - self.x
+        largura_ult_caixa = self.largura_max - (largura_pri_caixa * 2) - self.x
+        fonte.tamanho = 6
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, 'INSCRIÇÃO ESTADUAL', fonte)
+        self.caixa_de_texto(self.x + largura_pri_caixa, posicao_y, largura_pri_caixa, 6, 'INSC. EST. DO SUBST. TRIBUTARIO', fonte)
+        self.caixa_de_texto(self.x + largura_pri_caixa * 2, posicao_y, largura_ult_caixa, 6, 'CNPJ', fonte)
+        fonte.tamanho = 10
+        self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.emitente.inscricao_estadual, fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_pri_caixa, posicao_y, largura_pri_caixa, 6, self.nfe.emitente.inscricao_estadual_st, fonte, 'B', borda=False)
+        posicao_y += 1 + self.caixa_de_texto(self.x + largura_pri_caixa * 2, posicao_y, largura_ult_caixa, 6, f_cnpj(self.nfe.emitente.cnpj), fonte,
+                                             'B', borda=False)
+
+        posicao_y = self.destinatario_emitente(posicao_y)
+        posicao_y = self.duplicatas(posicao_y)
+        posicao_y = self.imposto(posicao_y)
+        posicao_y = self.transportador(posicao_y)
+
+    def destinatario_emitente(self, posicao_y: int) -> int:
+        fonte = FontePDF(tamanho=7, estilo='B')
+        largura_maior = round(self.largura_max * 0.68) - self.x
+        largura_media = round(self.largura_max * 0.22) - self.x
+        largura_menor = self.largura_max - largura_maior - largura_media - self.x
+        posicao_y += 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'DESTINATÁRIO/EMITENTE', fonte, borda=False)
+        fonte.tamanho = 6
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'NOME/RAZÃO SOCIAL', fonte)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6, 'CNPJ', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, 'DATA DA EMISSÃO', fonte)
+        fonte.tamanho = 10
+        if self.nfe.destinatario.cnpj:
+            cnpj_cpf = f_cpf(self.nfe.destinatario.cnpj)
+        else:
+            cnpj_cpf = f_cnpj(self.nfe.destinatario.cpf)
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.razao_social, fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6, cnpj_cpf, fonte, 'B', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, f_dma(self.nfe.ide.data_emissao),
+                                               fonte, 'B', borda=False)
+        fonte.tamanho = 6
+        largura_maior -= largura_menor
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'ENDERECO', fonte)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6, 'BAIRRO', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, 'CEP', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_media + largura_menor, posicao_y, largura_menor, 6, 'DATA DA SAÍDA', fonte)
+        fonte.tamanho = 10
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, construir_endereco(self.nfe.destinatario.endereco, com_cidade=False, com_bairro=False), fonte,
+                            'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6,
+                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False), fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6,
+                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False, com_bairro=False, com_cep=True), fonte,
+                            'B', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media + largura_menor, posicao_y, largura_menor, 6,
+                                               f_dma(self.nfe.ide.data_saida_entrada), fonte, 'B', borda=False)
+        fonte.tamanho = 6
+        largura_uf = self.get_string_width('0000')
+        largura_maior -= largura_uf
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'MUNICÍPIO', fonte)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_uf, 6, 'UF', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf, posicao_y, largura_menor, 6, 'FONE/FAX', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_menor, posicao_y, largura_media, 6, 'INSCRIÇÃO ESTADUAL', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y, largura_menor, 6, 'HORA DA SAÍDA', fonte)
+        fonte.tamanho = 10
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.endereco.municipio, fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_uf, 6, self.nfe.destinatario.endereco.uf, fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf, posicao_y, largura_menor, 6, f_fone(self.nfe.destinatario.endereco.telefone), fonte,
+                            'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_menor, posicao_y, largura_media, 6, self.nfe.destinatario.inscricao_estadual, fonte,
+                            'B', borda=False)
+        posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y, largura_menor, 6,
+                                                        f_hora(self.nfe.ide.data_saida_entrada), fonte, 'B', borda=False)
+        return posicao_y
+
+    def duplicatas(self, posicao_y: int) -> int:
+        fonte = FontePDF(tamanho=7, estilo='B')
+        incremento_y = 0
+        posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'FATURAS/DUPLICATAS', fonte, borda=False)
+        posicao_x = self.x
+        fonte.tamanho = 10
+        fonte.estilo = ''
+        self.configurar_fonte(fonte)
+        for duplicata in self.nfe.cobranca.duplicatas:
+            texto = f'{f_dma(duplicata.vencimento)} {duplicata.numero} {f_moeda(duplicata.valor)}'
+            largura = self.get_string_width(texto) + 2
+            if posicao_x + largura > self.largura_max:
+                posicao_x = self.x
+                posicao_y += incremento_y
+            incremento_y = self.caixa_de_texto(posicao_x, posicao_y, largura, 6, texto, fonte, 'C') + 1.2
+            posicao_x += largura
+        return posicao_y + incremento_y
+
+    def imposto(self, posicao_y: int) -> int:
+        fonte = FontePDF(tamanho=7, estilo='B')
+        largura_maior = round(self.largura_max / 5)
+        largura_maior_ult = self.largura_max - self.x - largura_maior * 4
+        largura_menor = round(self.largura_max / 7)
+        largura_menor_ult = self.largura_max - self.x - largura_menor * 6
+
+        posicao_y += 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'CÁLCULO DO IMPOSTO', fonte, borda=False)
+        fonte.tamanho = 6
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'BASE CALC ICMS', fonte, )
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_maior, 6, 'VALOR ICMS', fonte)
+        self.caixa_de_texto(self.x + largura_maior * 2, posicao_y, largura_maior, 6, 'BASE CALC ICMS ST', fonte)
+        self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, 'VALOR ICMS ST', fonte)
+        self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6, 'TOTAL DOS PRODUTOS', fonte)
+        fonte.tamanho = 10
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, f_moeda(self.nfe.total.icms.valor_base_calculo), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_maior, 6, f_moeda(self.nfe.total.icms.valor), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_maior * 2, posicao_y, largura_maior, 6, f_moeda(self.nfe.total.icms.valor_base_calculo_st), fonte, 'B', 'R',
+                            borda=False)
+        self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, f_moeda(self.nfe.total.icms.valor_st), fonte, 'B', 'R', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6, f_moeda(self.nfe.total.icms.valor_produtos), fonte,
+                                               'B', 'R', borda=False)
+
+        fonte.tamanho = 6
+        fonte.estilo = ''
+        self.caixa_de_texto(self.x, posicao_y, largura_menor, 6, 'VALOR FRETE', fonte, )
+        self.caixa_de_texto(self.x + largura_menor, posicao_y, largura_menor, 6, 'VALOR SEGURO', fonte)
+        self.caixa_de_texto(self.x + largura_menor * 2, posicao_y, largura_menor, 6, 'VALOR DESCONTO', fonte)
+        self.caixa_de_texto(self.x + largura_menor * 3, posicao_y, largura_menor, 6, 'OUTRAS DESP', fonte)
+        self.caixa_de_texto(self.x + largura_menor * 4, posicao_y, largura_menor, 6, 'VALOR IPI', fonte)
+        self.caixa_de_texto(self.x + largura_menor * 5, posicao_y, largura_menor, 6, 'VALOR APROX. TRIB.', fonte)
+        self.caixa_de_texto(self.x + largura_menor * 6, posicao_y, largura_menor_ult, 6, 'TOTAL DA NOTA', fonte)
+        fonte.tamanho = 10
+        self.caixa_de_texto(self.x, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_frete), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_seguro), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 2, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_desconto), fonte, 'B', 'R',
+                            borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 3, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_outros), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 4, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_ipi), fonte, 'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 5, posicao_y, largura_menor, 6, f_moeda(self.nfe.total.icms.valor_total_tributos), fonte, 'B', 'R',
+                            borda=False)
+        posicao_y += self.caixa_de_texto(self.x + largura_menor * 6, posicao_y, largura_menor_ult, 6, f_moeda(self.nfe.total.icms.valor_nf), fonte, 'B',
+                                         'R', borda=False)
+        return posicao_y
+
+    def transportador(self, posicao_y: int) -> int:
+        def get_por_conta(modalidade: int) -> str:
+            if modalidade == 0:
+                return '0-EMITENTE'
+            if modalidade == 1:
+                return '1-DESTINATARIO'
+            if modalidade == 2:
+                return '2-TERCEIRO'
+            return '9-SEM FRETE'
+
+        fonte = FontePDF(tamanho=7, estilo='B')
+        posicao_y += 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'TRANSPORTADOR/VOLUMES TRANSPORTADOS', fonte, borda=False)
+        fonte.tamanho = 10
+        fonte.estilo = ''
+        self.configurar_fonte(fonte)
+        largura_uf = self.get_string_width('0000')
+        largura_maior = round(self.largura_max * 0.4)
+        largura_menor = round((self.largura_max - largura_maior) / 4)
+        largura_menor_ult = round(self.largura_max - largura_maior - largura_menor * 3) - self.x + largura_uf
+        fonte.tamanho = 6
+        if self.nfe.transporte.transportador:
+            razao_social = self.nfe.transporte.transportador.razao_social
+            endereco = self.nfe.transporte.transportador.endereco
+            municipio = self.nfe.transporte.transportador.municipio
+            uf = self.nfe.transporte.transportador.uf
+            inscricao_estadual = self.nfe.transporte.transportador.inscricao_estadual
+            if self.nfe.transporte.transportador.cnpj:
+                cnpj_cpf = f_cnpj(self.nfe.transporte.transportador.cnpj)
+            else:
+                cnpj_cpf = f_cnpj(self.nfe.transporte.transportador.cpf)
+        else:
+            razao_social = endereco = municipio = uf = inscricao_estadual = cnpj_cpf = ''
+
+        if self.nfe.transporte.veiculo:
+            rntc = self.nfe.transporte.veiculo.rntc
+            placa = self.nfe.transporte.veiculo.placa
+            uf_placa = self.nfe.transporte.veiculo.uf
+        elif self.nfe.transporte.reboques:
+            reboque = self.nfe.transporte.reboques[0]
+            rntc = reboque.rntc
+            placa = reboque.placa
+            uf_placa = reboque.uf
+        else:
+            rntc = placa = uf_placa = ''
+
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'NOME/RAZÃO SOCIAL', fonte)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 6, 'FRETE POR CONTA', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor - largura_uf, 6, 'CÓDIGO ANTT', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6, 'PLACA DO VEÍC', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, 'UF', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, 'CPF/CNPJ', fonte)
+        fonte.tamanho = 10
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, razao_social, fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 6, get_por_conta(self.nfe.transporte.modalidade_frete), fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor - largura_uf, 6, rntc, fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6, placa, fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf_placa, fonte, 'B', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, cnpj_cpf, fonte, 'B',
+                                               borda=False)
+        fonte.tamanho = 6
+        self.caixa_de_texto(self.x, posicao_y, largura_maior + largura_menor, 6, 'ENDEREÇO', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor * 2 - largura_uf * 2, 6, 'MUNICÍPIO', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, 'UF', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, 'INSCRIÇÃO ESTADUAL', fonte)
+        fonte.tamanho = 10
+        self.caixa_de_texto(self.x, posicao_y, largura_maior + largura_menor, 6, endereco, fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor * 2 - largura_uf * 2, 6, municipio, fonte, 'B', borda=False,
+                            forcar=True)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf, fonte, 'B', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, inscricao_estadual,
+                                               fonte, 'B', borda=False, forcar=True)
+        fonte.tamanho = 6
+        largura_menor = round(self.largura_max / 6)
+        largura_menor_ult = self.largura_max - self.x - largura_menor * 5
+        self.caixa_de_texto(self.x, posicao_y, largura_menor_ult, 6, 'QUANTIDADE', fonte)
+        self.caixa_de_texto(self.x + largura_menor_ult, posicao_y, largura_menor, 6, 'ESPÉCIE', fonte)
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor, posicao_y, largura_menor, 6, 'MARCA', fonte)
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 2, posicao_y, largura_menor, 6, 'NUMERAÇÃO', fonte)
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 3, posicao_y, largura_menor, 6, 'PESO BRUTO', fonte)
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 4, posicao_y, largura_menor, 6, 'PESO LIQUIDO', fonte)
+        fonte.tamanho = 10
+
+        return posicao_y

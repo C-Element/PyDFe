@@ -238,7 +238,7 @@ class DFePDF(FPDF):
         y1 = 0
         x1 = 0
         resetou = False
-        self.set_font(fonte.nome, fonte.estilo, fonte.tamanho)
+        self.configurar_fonte(fonte)
         if l < 0:
             return y
         texto = texto.strip()
@@ -364,3 +364,6 @@ class DFePDF(FPDF):
                 x += (coordenadas[j] + coordenadas[j+1]) * modulo
                 j += 2
             i += 1
+
+    def configurar_fonte(self, fonte: FontePDF):
+        self.set_font(fonte.nome, fonte.estilo, fonte.tamanho)
