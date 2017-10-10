@@ -1556,7 +1556,7 @@ class Transporte(BaseObjDFe):  # [#X01]
                 self.transportador = Transportador(valor)
             elif chave == 'vagao':
                 self.vagao = valor
-            elif chave == 'vaicTransp':
+            elif chave == 'veicTransp':
                 self.veiculo = TransporteVeiculo(valor)
             elif chave == 'vol':
                 if isinstance(valor, list):
