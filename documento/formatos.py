@@ -14,10 +14,14 @@ def encher(texto: str, caractere: str, tamanho: int, na_frente: bool = True) -> 
 
 
 def f_dma(data: date) -> str:
+    if not isinstance(data, date):
+        return ''
     return data.strftime('%d/%m/%Y')
 
 
 def f_dmah(data: datetime) -> str:
+    if not isinstance(data, datetime):
+        return ''
     return data.strftime('%d/%m/%Y %H:%M:%S')
 
 
@@ -71,3 +75,9 @@ def f_cnpj(texto: str) -> str:
 def f_cpf(texto: str) -> str:
     texto = encher(texto, '0', 11)
     return f'{texto[0:3]}.{texto[3:6]}.{texto[6:9]}-{texto[9:11]}'
+
+
+def f_hora(data: datetime) -> str:
+    if not isinstance(data, datetime):
+        return ''
+    return data.strftime('%H:%M:%S')
