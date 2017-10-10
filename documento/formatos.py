@@ -61,3 +61,13 @@ def f_espaco_a_cada(texto: str, parada: int) -> str:
             retorno += ' '
             contador = 0
     return retorno
+
+
+def f_cnpj(texto: str) -> str:
+    texto = encher(texto, '0', 14)
+    return f'{texto[0:2]}.{texto[2:5]}.{texto[5:8]}/{texto[8:12]}-{texto[12:14]}'
+
+
+def f_cpf(texto: str) -> str:
+    texto = encher(texto, '0', 11)
+    return f'{texto[0:3]}.{texto[3:6]}.{texto[6:9]}-{texto[9:11]}'
