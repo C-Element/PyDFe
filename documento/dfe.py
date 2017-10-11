@@ -1596,7 +1596,7 @@ class TransporteVolume(BaseObjDFe):  # :: <vol> [#X26]
         self.lacres: ListaLacres = []  # :: <lacres> [#X33]
         self.marca: str = str()  # :: <marca> [#X29]
         self.numercao: str = str()  # :: <nVol> [#X30]
-        self.peso_bruto: int = int()  # :: <pesoB> [#X32]
+        self.peso_bruto: Decimal = Decimal()  # :: <pesoB> [#X32]
         self.peso_liquido: Decimal = Decimal()  # :: <pesoL> [#X31]
         self.quantidade: int = int()  # :: <qVol> [#X27]
         super().__init__(dado)
