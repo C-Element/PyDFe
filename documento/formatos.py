@@ -26,11 +26,15 @@ def f_dmah(data: datetime) -> str:
 
 
 def f_moeda(valor: Decimal) -> str:
-    return f'R$ {valor:,.2f}'.replace('.', '*').replace(',', '.').replace('*', ',')
+    return f'R$ {f_dec_milhar(valor)}'
 
 
 def f_int_milhar(valor: int) -> str:
     return f'{valor:,}'.replace(',', '.')
+
+
+def f_dec_milhar(valor: Decimal) -> str:
+    return f'{valor:,.2f}'.replace('.', '*').replace(',', '.').replace('*', ',')
 
 
 def f_fone(texto: str) -> str:
