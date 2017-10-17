@@ -85,3 +85,7 @@ def f_hora(data: datetime) -> str:
     if not isinstance(data, datetime):
         return ''
     return data.strftime('%H:%M:%S')
+
+
+def f_cst(cst: int) -> str:
+    return f'{cst:03}'
