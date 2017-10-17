@@ -34,7 +34,7 @@ def f_int_milhar(valor: int) -> str:
 
 
 def f_dec_milhar(valor: Decimal) -> str:
-    return f'{valor:,.2f}'.replace('.', '*').replace(',', '.').replace('*', ',')
+    return f'{valor:,.3f}'.replace('.', '*').replace(',', '.').replace('*', ',')
 
 
 def f_fone(texto: str) -> str:
