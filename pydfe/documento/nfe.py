@@ -533,6 +533,11 @@ class DANFe(DFePDF):
                 self.add_page()
             produto = detalhe.produto
             icms = detalhe.imposto.icms.icms
+
+            vbc = f_dec_milhar(icms.valor_base_calculo, 2) if hasattr(icms, 'valor_base_calculo') else '0,00'
+            vicms = f_dec_milhar(icms.valor_icms, 2) if hasattr(icms, 'valor_icms') else '0,00'
+            aliquota = f_relevante(icms.aliquota) if hasattr(icms, 'aliquota') else '0'
+
             posicao_y = self.y_agora
             descricao = f'{produto.descricao}\n{detalhe.informacoes_adicionais}'
             altura = 1 + self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura, descricao, fonte, 'T', 'L', borda=False)
@@ -556,14 +561,12 @@ class DANFe(DFePDF):
                                 self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_total, 2), fonte,
                                 'T', 'R', borda=False)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, f_dec_milhar(icms.valor_base_calculo, 2),
-                                fonte, 'T', 'R', borda=False)
+                                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, vbc, fonte, 'T', 'R', borda=False)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura, f_dec_milhar(icms.valor_icms, 2), fonte, 'T',
+                                self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura, vicms, fonte, 'T',
                                 'R', borda=False)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, f_relevante(icms.aliquota), fonte, 'T',
-                                'R', borda=False)
+                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, aliquota, fonte, 'T', 'R', borda=False)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
                                 self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura,
                                 f_dec_milhar(detalhe.imposto.total_tributos, 2), fonte, 'T', 'R', borda=False)
