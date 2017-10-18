@@ -209,7 +209,7 @@ class Detalhamento(BaseObjDFe):  # [#H01]
 
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
-            if chave == 'impost':
+            if chave == 'imposto':
                 self.imposto = Imposto(valor)
             elif chave == 'infAdProd':
                 self.informacoes_adicionais = valor
@@ -224,23 +224,55 @@ class Detalhamento(BaseObjDFe):  # [#H01]
 class DocumentoReferenciado(BaseObjDFe):  # [#BA01]
 
     def __init__(self, dado: OrderedDict):
-        self.chave_nfe_ref: int = int()  # Chave de acesso da NF-e referenciada :: <refNFe> [#BA02]
-        self.informacao_nfe_ref: NFeReferenciada = None  # Informação da NF modelo 1/1A referenciada :: <refNF> [#BA03]
-        self.informacao_nfe_pr_ref: NFeReferenciadaProdutoRural = None  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
-        self.informacao_ecf_ref: ECFReferenciado = None  # Informações do Cupom Fiscal referenciado :: <refECF> [#BA20]
+        self.chave_nfe_ref: List[int] = []  # Chave de acesso da NF-e referenciada :: <refNFe> [#BA02]
+        self.informacao_nf_ref: List[NFeReferenciada] = []  # Informação da NF modelo 1/1A referenciada :: <refNF> [#BA03]
+        self.informacao_nfe_pr_ref: List[NFeReferenciadaProdutoRural] = []  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
+        self.informacao_ecf_ref: List[ECFReferenciado] = []  # Informações do Cupom Fiscal referenciado :: <refECF> [#BA20]
+        self.chave_cte_ref: List[int] = []  # Informações do CTe referenciado :: <refCTe> [#BA19]
         super().__init__(dado)
 
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'refNFe':
-                self.chave_nfe_ref = int(valor)
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = int(doc)
+                        self.chave_nfe_ref.append(documento)
+                else:
+                    documento = int(valor)
+                    self.chave_nfe_ref.append(documento)
             elif chave == 'refNF':
-                self.informacao_nfe_ref = NFeReferenciada(valor)
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = NFeReferenciada(doc)
+                        self.informacao_nf_ref.append(documento)
+                else:
+                    documento = NFeReferenciada(valor)
+                    self.informacao_nf_ref.append(documento)
             elif chave == 'refNFP':
-                self.informacao_nfe_pr_ref = NFeReferenciadaProdutoRural(valor)
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = NFeReferenciadaProdutoRural(doc)
+                        self.informacao_nfe_pr_ref.append(documento)
+                else:
+                    documento = NFeReferenciadaProdutoRural(valor)
+                    self.informacao_nfe_pr_ref.append(documento)
             elif chave == 'refECF':
-                self.informacao_ecf_ref = ECFReferenciado(valor)
-
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = ECFReferenciado(doc)
+                        self.informacao_ecf_ref.append(documento)
+                else:
+                    documento = ECFReferenciado(valor)
+                    self.informacao_ecf_ref.append(documento)
+            elif chave == 'refCTe':
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = int(doc)
+                        self.chave_cte_ref.append(documento)
+                else:
+                    documento = int(valor)
+                    self.chave_cte_ref.append(documento)
 
 class Duplicata(BaseObjDFe):  # [#Y07]
 
@@ -719,7 +751,7 @@ class IDe(BaseObjDFe):  # [#B01]
         self.cnf: int = int()  # Código numérico que compõe a Chave de Acesso. Número aleatório gerado pelo emitente :: <cNF> [#B03]
         self.data_emissao: datetime = None  # Data/Hora da emissão <dhEmi> [#B09]
         self.data_saida_entrada: datetime = None  # Data/Hora da saída/entrada <dhSaiEnt > [#B10]
-        self.documento_referenciado: DocumentoReferenciado = None  # Informação de Documentos Fiscais referenciados :: <NFref> #[#BA01]
+        self.documentos_referenciados: ListaDocumentoReferenciado = []  # Informação de Documentos Fiscais referenciados :: <NFref> #[#BA01]
         self.dv: int = int()  # DV da chave de acesso :: <cDV> [#B23]
         self.finalidade: int = int()  # Finalidade de emissão  1=NF-e normal; 2=NF-e complementar; 3=NF-e de ajuste 4=Devolução de mercadoria.:: <finNFe> [#B25]
         self.id_destino: int = int()  # Identificador de local de destino. 1=Op. interna; 2=Op. interestadual; 3=Op. com exterior :: <idDest> [#B11a]
@@ -757,7 +789,13 @@ class IDe(BaseObjDFe):  # [#B01]
             elif chave == 'dhSaiEnt':
                 self.data_saida_entrada = ler_data_hora(valor)
             elif chave == 'NFref':
-                self.documento_referenciado = DocumentoReferenciado(valor)
+                if isinstance(valor, list):
+                    for doc in valor:
+                        documento = DocumentoReferenciado(doc)
+                        self.documentos_referenciados.append(documento)
+                else:
+                    documento = DocumentoReferenciado(valor)
+                    self.documentos_referenciados.append(documento)
             elif chave == 'cDV':
                 self.dv = int(valor)
             elif chave == 'finNFe':
@@ -1281,7 +1319,7 @@ class Produto(BaseObjDFe):  # [#I01]
             elif chave == 'vDesc':
                 self.desconto = Decimal(valor)
             elif chave == 'xProd':
-                self.desconto = valor
+                self.descricao = valor
             elif chave == 'EXTIPI':
                 self.ex_tipi = int(valor)
             elif chave == 'vFrete':
@@ -1664,6 +1702,7 @@ class VolumeLacre(BaseObjDFe):  # [#X33]
 
 # Tipos
 DetalhesProduto = Dict[int, Detalhamento]
+ListaDocumentoReferenciado = List[DocumentoReferenciado]
 ListaDuplicatas = List[Duplicata]
 ListaLacres = List[VolumeLacre]
 ListaObservacoesContribuinte = List[ObservacaoContribuinte]

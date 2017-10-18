@@ -190,6 +190,12 @@ class DFePDF(FPDF):
     def cabecalho(self):
         pass
 
+    def footer(self):
+        self.rodape()
+
+    def rodape(self):
+        pass
+
     def retangulo(self, x: int, y: int, l: int, a: int) -> [int, int]:
         self.rect(x, y, l, a)
         return [x + l, y + a]
@@ -361,7 +367,7 @@ class DFePDF(FPDF):
             j = 0
             while j < len(coordenadas):
                 self.rect(x, y, coordenadas[j] * modulo, a, "F")
-                x += (coordenadas[j] + coordenadas[j+1]) * modulo
+                x += (coordenadas[j] + coordenadas[j + 1]) * modulo
                 j += 2
             i += 1
 

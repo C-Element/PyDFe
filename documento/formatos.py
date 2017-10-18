@@ -19,6 +19,12 @@ def f_dma(data: date) -> str:
     return data.strftime('%d/%m/%Y')
 
 
+def f_ma(data: date) -> str:
+    if not isinstance(data, date):
+        return ''
+    return data.strftime('%m/%Y')
+
+
 def f_dmah(data: datetime) -> str:
     if not isinstance(data, datetime):
         return ''
@@ -89,3 +95,7 @@ def f_hora(data: datetime) -> str:
 
 def f_cst(cst: int) -> str:
     return f'{cst:03}'
+
+
+def f_relevante(valor: Decimal) -> str:
+    return str(Decimal(str(round(valor, 5)).strip('0'))).replace('.', ',')
