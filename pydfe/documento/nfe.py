@@ -3,11 +3,9 @@ from datetime import datetime
 
 from xmltodict import parse as x2d_parse
 
-from documento.dfe import ler_data_hora
-from documento.formatos import f_ma
 from .DFePDF import FontePDF, DFePDF
-from .dfe import InfNFe, Endereco
-from .formatos import f_dma, f_dmah, f_moeda, f_int_milhar, f_cep, f_fone, f_espaco_a_cada, f_cnpj, f_cpf, f_hora, f_dec_milhar, f_cst, f_relevante
+from .dfe import ler_data_hora, InfNFe, Endereco
+from .formatos import f_dma, f_dmah, f_moeda, f_int_milhar, f_cep, f_fone, f_espaco_a_cada, f_cnpj, f_cpf, f_hora, f_dec_milhar, f_cst, f_relevante, f_ma
 
 
 def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bool = False, com_cidade: bool = True, com_fone: bool = False,
