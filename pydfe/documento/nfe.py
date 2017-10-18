@@ -18,7 +18,7 @@ def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bo
         return ''
 
     if com_endereco:
-        retorno += f'{obj_end.logradouro}, {obj_end.numero} - {obj_end.complemento}'
+        retorno += f'{obj_end.logradouro}, {obj_end.numero}{" - " if obj_end.complemento else ""}{obj_end.complemento}'
     if com_bairro:
         retorno += se_tem(', ') + f'{obj_end.bairro}'
     if com_cep:
