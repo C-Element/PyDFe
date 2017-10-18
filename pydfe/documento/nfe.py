@@ -76,6 +76,12 @@ class NFe(object):
         danfe.inserir_produtos()
         danfe.output(caminho, 'F')
 
+    def gerar_pdf_stream(self) -> bytes:
+        danfe = DANFe(self)
+        danfe.add_page()
+        danfe.inserir_produtos()
+        return danfe.output(dest='S')
+
 
 class DANFe(DFePDF):
     def __init__(self, nfe: NFe):
