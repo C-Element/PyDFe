@@ -93,13 +93,13 @@ class DANFe(DFePDF):
         self.y_agora = 0
         fonte = FontePDF()
         self.configurar_fonte(fonte)
-        self.largura_codigo = self.get_string_width('0000000000')
-        self.largura_barras = self.get_string_width('00000000000000')
-        self.largura_ncm = self.get_string_width('000000000')
+        self.largura_codigo = self.get_string_width('0000000000000')
+        self.largura_barras = self.get_string_width('0000000000000')
+        self.largura_ncm = self.get_string_width('00000000')
         self.largura_cst_un = self.get_string_width('0000')
         self.largura_cfop_aliq = self.get_string_width('00000')
-        self.largura_qt = self.get_string_width('000000')
-        self.largura_tributos = self.get_string_width('TRIBUTOS')
+        self.largura_qt = self.get_string_width('0000000')
+        self.largura_tributos = self.get_string_width('TRIBUTO')
         self.largura_descricao = self.largura_max - self.x - self.largura_codigo - self.largura_barras - self.largura_ncm - self.largura_cst_un * 3 - \
                                  self.largura_cfop_aliq - self.largura_qt * 5 - self.largura_tributos
 
@@ -541,35 +541,38 @@ class DANFe(DFePDF):
             posicao_y = self.y_agora
             descricao = f'{produto.descricao}\n{detalhe.informacoes_adicionais}'
             altura = 1 + self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura, descricao, fonte, 'T', 'L', borda=False)
-            self.caixa_de_texto(self.x, posicao_y, self.largura_codigo, altura, produto.codigo, fonte, 'T', 'R', borda=False)
+            self.caixa_de_texto(self.x, posicao_y, self.largura_codigo, altura, produto.codigo, fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, altura, produto.gtin, fonte, 'T', 'R',
-                                borda=False)
+                                borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm, altura,
-                                str(produto.ncm), fonte, 'T', 'R', borda=False)
+                                str(produto.ncm), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
-                                self.largura_cst_un, altura, f_cst(icms.cst), fonte, 'T', 'R', borda=False)
+                                self.largura_cst_un, altura, f_cst(icms.cst), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
-                                posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False)
+                                posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
-                                self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura, produto.unidade, fonte, 'T', 'R', borda=False)
+                                self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura, produto.unidade, fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq, posicao_y, self.largura_qt, altura, f_relevante(produto.quantidade), fonte, 'T', 'R', borda=False)
+                                self.largura_cfop_aliq, posicao_y, self.largura_qt, altura, f_relevante(produto.quantidade), fonte, 'T', 'R', borda=False,
+                                forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
                                 self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_unitario, 2), fonte,
-                                'T', 'R', borda=False)
+                                'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
                                 self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_total, 2), fonte,
-                                'T', 'R', borda=False)
+                                'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, vbc, fonte, 'T', 'R', borda=False)
+                                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, vbc, fonte, 'T', 'R', borda=False,
+                                forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
                                 self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura, vicms, fonte, 'T',
-                                'R', borda=False)
+                                'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, aliquota, fonte, 'T', 'R', borda=False)
+                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, aliquota, fonte, 'T', 'R', borda=False,
+                                forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
                                 self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura,
-                                f_dec_milhar(detalhe.imposto.total_tributos, 2), fonte, 'T', 'R', borda=False)
+                                f_dec_milhar(detalhe.imposto.total_tributos, 2), fonte, 'T', 'R', borda=False, forcar=True)
             self.line(self.x, posicao_y + altura, self.largura_max, posicao_y + altura)
             self.y_agora += altura
 
