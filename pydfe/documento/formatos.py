@@ -32,7 +32,7 @@ def f_dmah(data: datetime) -> str:
 
 
 def f_moeda(valor: Decimal) -> str:
-    return f'R$ {f_dec_milhar(valor)}'
+    return f'R$ {f_dec_milhar(valor,2)}'
 
 
 def f_int_milhar(valor: int) -> str:
