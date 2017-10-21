@@ -700,12 +700,12 @@ class DANFeNFCe(DFePDF):
             dest = self.nfe.destinatario
             documento = f'CPF: {f_cpf(dest.cpf)}' if dest.cpf else f'CNPJ: {f_cnpj(dest.cnpj)}'
             nome = dest.razao_social if dest.razao_social else 'CONSUMIDOR FINAL'
-            linha_cliente = f'CONSUMIDOR {documento} - {nome}'
+            linha_cliente = f'{documento} - {nome}'
         else:
             linha_cliente = 'NÃO IDENTIFICADO'
         linha_nfce = f'NFC-e Nº {f_int_milhar(self.nfe.ide.nf)}    Série: {self.nfe.ide.serie}    {f_dmah(self.nfe.ide.data_emissao)}'
         fonte.estilo = 'B'
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, linha_cliente, fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'CONSUMIDOR {linha_cliente}', fonte, 'B', 'L', False)
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, linha_nfce, fonte, 'B', 'L', False)
         fonte.estilo = ''
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'Protocolo de autorização: {self.protocolo}', fonte, 'B',
