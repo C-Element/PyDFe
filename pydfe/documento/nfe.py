@@ -688,14 +688,14 @@ class DANFeNFCe(DFePDF):
         posicao_y = self.verifica_se_cabe(posicao_y)
         posicao_y += 5 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, f_espaco_a_cada(self.nfe.id.replace('NFe', ''), 4), fonte, 'B', 'C',
                                              False)
-        qr = qrcode.QRCode()
+        qr = qrcode.QRCode(border=0)
         qr.add_data(self.dado_qrcode)
         img = qr.make_image()
-        if self.verifica_se_cabe(posicao_y + 50) == self.y:
+        if self.verifica_se_cabe(posicao_y + 42) == self.y:
             posicao_y = self.y
-        posicao_y_pulo = posicao_y + 50
-        posicao_x = self.x + 50
-        self.imagem_pil(img, self.x, posicao_y, 50, 50)
+        posicao_y_pulo = posicao_y + 42
+        posicao_x = self.x + 42
+        self.imagem_pil(img, self.x, posicao_y, 40, 40)
         if self.nfe.destinatario:
             dest = self.nfe.destinatario
             documento = f'CPF: {f_cpf(dest.cpf)}' if dest.cpf else f'CNPJ: {f_cnpj(dest.cnpj)}'

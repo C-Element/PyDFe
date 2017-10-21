@@ -1,10 +1,10 @@
+import os
+import re
+import zlib
 from datetime import datetime
 from io import BytesIO
 from math import fmod
 
-import re
-
-import zlib
 from fpdf import FPDF
 from fpdf.errors import fpdf_error
 from fpdf.php import substr
@@ -30,7 +30,7 @@ def strtr(texto: str, de: str, para: str) -> str:
 
 
 class FontePDF(object):
-    def __init__(self, nome='Times', tamanho=8, estilo=''):
+    def __init__(self, nome='gothic', tamanho=8, estilo=''):
         self.estilo = estilo
         self.nome = nome
         self.tamanho = tamanho
@@ -46,6 +46,9 @@ class DFePDF(FPDF):
         self.largura_max = 210 - self.margens[ESQUERDA]  # Iremos trabalhar a principio apenas com A4 em porta retrato
         self.set_margins(*self.margens)
         self.alias_nb_pages()
+        self.add_font('gothic', '', os.path.join(os.path.dirname(__file__), 'GOTHIC.TTF'), True)
+        self.add_font('gothic', 'B', os.path.join(os.path.dirname(__file__), 'GOTHICB.TTF'), True)
+        self.add_font('gothic', 'I', os.path.join(os.path.dirname(__file__), 'GOTHICI.TTF'), True)
 
         self.conjunto_abc = ''  # conjunto de caracteres legiveis em 128
         self.conjunto_a = ''  # grupo A do conjunto de de caracteres legiveis
