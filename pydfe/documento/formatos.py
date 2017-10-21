@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from decimal import Decimal
 
+from pydfe.documento.dfe import Endereco
+
 
 def encher(texto: str, caractere: str, tamanho: int, na_frente: bool = True) -> str:
     if not isinstance(texto, str):
@@ -99,3 +101,25 @@ def f_cst(cst: int) -> str:
 
 def f_relevante(valor: Decimal) -> str:
     return str(Decimal(str(round(valor, 5)).strip('0'))).replace('.', ',')
+
+
+def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bool = False, com_cidade: bool = True, com_fone: bool = False,
+                       com_bairro: bool = True) -> str:
+    retorno = ''
+
+    def se_tem(texto: str = ' - '):
+        if len(retorno) > 0:
+            return texto
+        return ''
+
+    if com_endereco:
+        retorno += f'{obj_end.logradouro}, {obj_end.numero}{" - " if obj_end.complemento else ""}{obj_end.complemento}'
+    if com_bairro:
+        retorno += se_tem(', ') + f'{obj_end.bairro}'
+    if com_cep:
+        retorno += se_tem() + f'{f_cep(obj_end.cep)}'
+    if com_cidade:
+        retorno += se_tem() + f'{obj_end.municipio}/{obj_end.uf}'
+    if com_fone:
+        retorno += se_tem() + f'FONE: {f_fone(obj_end.telefone)}'
+    return retorno

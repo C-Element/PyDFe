@@ -1,6 +1,16 @@
+from datetime import datetime
+from io import BytesIO
 from math import fmod
 
+import re
+
+import zlib
 from fpdf import FPDF
+from fpdf.errors import fpdf_error
+from fpdf.php import substr
+from fpdf.py3k import b
+from fpdf.util import freadint as read_integer
+from qrcode.image.pil import PilImage
 
 DIREITA = 2
 ESQUERDA = 0
@@ -238,7 +248,8 @@ class DFePDF(FPDF):
 
     # Cria uma caixa de texto com ou sem bordas. Esta função perimite o alinhamento horizontal
     # ou vertical do texto dentro da caixa.
-    def caixa_de_texto(self, x: int, y: int, l: int, a: int, texto: str = '', fonte: FontePDF = FontePDF(), alinhamento_v: str = 'T', alinhamento_h: str = 'L',
+    def caixa_de_texto(self, x: float, y: float, l: float, a: float, texto: str = '', fonte: FontePDF = FontePDF(), alinhamento_v: str = 'T',
+                       alinhamento_h: str = 'L',
                        borda: bool = True, forcar: bool = False, altura_max: int = 0, deslocamento_v: int = 0):
         y_ant = y
         y1 = 0
@@ -373,3 +384,172 @@ class DFePDF(FPDF):
 
     def configurar_fonte(self, fonte: FontePDF):
         self.set_font(fonte.nome, fonte.estilo, fonte.tamanho)
+
+    def imagem_pil(self, dado: PilImage, x: float = None, y: float = None, l: float = 0, a: float = 0, link: str = None):
+        "Coloca uma imagem PIL no PDF ... código do FPDF modificado"
+        assert isinstance(dado, PilImage)
+        info = self._analise_png(dado)
+        info['i'] = len(self.images) + 1
+        self.images[datetime.now().strftime('%Y%m%d%H%M%S')] = info
+
+        # Automatic width and height calculation if needed
+        if l == 0 and a == 0:
+            # Put image at 72 dpi
+            l = info['w'] / self.k
+            a = info['h'] / self.k
+        elif l == 0:
+            l = a * info['w'] / info['h']
+        elif a == 0:
+            a = l * info['h'] / info['w']
+
+        # Flowing mode
+        if y is None:
+            if self.y + a > self.page_break_trigger and not self.in_footer and self.accept_page_break:
+                # Automatic page break
+                x = self.x
+                self.add_page(same=True)
+                self.x = x
+            y = self.y
+            self.y += a
+
+        if x is None:
+            x = self.x
+        self._out('q %.2f 0 0 %.2f %.2f %.2f cm /I%d Do Q' % (l * self.k, a * self.k, x * self.k, (self.h - (y + a)) * self.k, info['i']))
+        if link:
+            self.link(x, y, l, a, link)
+
+    def _analise_png(self, dado: PilImage):
+        # Extract info from a PNG file
+        f = BytesIO()
+        dado.save(f, 'png')
+        f = BytesIO(f.getvalue())
+        # Check signature
+        magic = f.read(8).decode("latin1")
+        signature = '\x89' + 'PNG' + '\r' + '\n' + '\x1a' + '\n'
+        if magic != signature:
+            fpdf_error('Not a PNG file: ' + f.getvalue().decode("latin1"))
+
+        # Read header chunk
+        f.read(4)
+        chunk = f.read(4).decode("latin1")
+        if chunk != 'IHDR':
+            fpdf_error('Incorrect PNG file: ' + f.getvalue().decode("latin1"))
+        w = read_integer(f)
+        h = read_integer(f)
+        bpc = ord(f.read(1))
+        if bpc > 8:
+            fpdf_error('16-bit depth not supported: ' + f.getvalue().decode("latin1"))
+        ct = ord(f.read(1))
+        if ct == 0 or ct == 4:
+            colspace = 'DeviceGray'
+        elif ct == 2 or ct == 6:
+            colspace = 'DeviceRGB'
+        elif ct == 3:
+            colspace = 'Indexed'
+        else:
+            fpdf_error('Unknown color type: ' + f.getvalue().decode("latin1"))
+
+        if ord(f.read(1)) != 0:
+            fpdf_error('Unknown compression method: ' + f.getvalue().decode("latin1"))
+        if ord(f.read(1)) != 0:
+            fpdf_error('Unknown filter method: ' + f.getvalue().decode("latin1"))
+        if ord(f.read(1)) != 0:
+            fpdf_error('Interlacing not supported: ' + f.getvalue().decode("latin1"))
+        f.read(4)
+
+        dp = '/Predictor 15 /Colors '
+        dp += '3' if colspace == 'DeviceRGB' else '1'
+        dp += ' /BitsPerComponent ' + str(bpc) + ' /Columns ' + str(w) + ''
+
+        # Scan chunks looking for palette, transparency and image data
+        pal = ''
+        trns = ''
+        data = bytes()
+        n = 1
+        while n is not None:
+            n = read_integer(f)
+
+            my_type = f.read(4).decode("latin1")
+            if my_type == 'PLTE':
+                # Read palette
+                pal = f.read(n)
+                f.read(4)
+
+            elif my_type == 'tRNS':
+                # Read transparency info
+                t = f.read(n)
+                if ct == 0:
+                    trns = [ord(substr(t, 1, 1))]
+                elif ct == 2:
+                    trns = [
+                        ord(substr(t, 1, 1)),
+                        ord(substr(t, 3, 1)),
+                        ord(substr(t, 5, 1))
+                    ]
+                else:
+                    pos = t.find('\x00'.encode("latin1"))
+                    if pos != -1:
+                        trns = [pos, ]
+                f.read(4)
+
+            elif my_type == 'IDAT':
+                # Read image data block
+                data += f.read(n)
+                f.read(4)
+
+            elif my_type == 'IEND':
+                break
+
+            # bug fix @4306eaf24e81596af29117cf3d606242a5edfb89
+            # shoutout to https://github.com/klaplong
+            # read_integer returns None if struct#unpack errors out
+            elif n is not None:
+                f.read(n + 4)
+
+        if colspace == 'Indexed' and not pal:
+            fpdf_error('Missing palette in ' + f.getvalue().decode("latin1"))
+        f.close()
+        info = {
+            'w': w, 'h': h,
+            'cs': colspace, 'bpc': bpc,
+            'f': 'FlateDecode', 'dp': dp,
+            'pal': pal, 'trns': trns
+        }
+        if ct >= 4:  # if ct == 4, or == 6
+            # Extract alpha channel
+            make_re = lambda regex: re.compile(regex, flags=re.DOTALL)
+
+            data = zlib.decompress(data)
+            color = b('')
+            alpha = b('')
+            if ct == 4:
+                # Gray image
+                length = 2 * w
+                for i in range(h):
+                    pos = (1 + length) * i
+                    color += b(data[pos])
+                    alpha += b(data[pos])
+                    line = substr(data, pos + 1, length)
+                    re_c = make_re('(.).'.encode("ascii"))
+                    re_a = make_re('.(.)'.encode("ascii"))
+                    color += re_c.sub(lambda m: m.group(1), line)
+                    alpha += re_a.sub(lambda m: m.group(1), line)
+            else:
+                # RGB image
+                length = 4 * w
+                for i in range(h):
+                    pos = (1 + length) * i
+                    color += b(data[pos])
+                    alpha += b(data[pos])
+                    line = substr(data, pos + 1, length)
+                    re_c = make_re('(...).'.encode("ascii"))
+                    re_a = make_re('...(.)'.encode("ascii"))
+                    color += re_c.sub(lambda m: m.group(1), line)
+                    alpha += re_a.sub(lambda m: m.group(1), line)
+            del data
+            data = zlib.compress(color)
+            info['smask'] = zlib.compress(alpha)
+            if self.pdf_version < '1.4':
+                self.pdf_version = '1.4'
+        info['data'] = data
+        return info

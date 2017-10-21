@@ -1,41 +1,24 @@
 from collections import OrderedDict
 from datetime import datetime
+from decimal import Decimal
 
+import qrcode
+from urllib3.util.url import parse_url
 from xmltodict import parse as x2d_parse
 
-from .DFePDF import FontePDF, DFePDF
-from .dfe import ler_data_hora, InfNFe, Endereco
-from .formatos import f_dma, f_dmah, f_moeda, f_int_milhar, f_cep, f_fone, f_espaco_a_cada, f_cnpj, f_cpf, f_hora, f_dec_milhar, f_cst, f_relevante, f_ma
-
-
-def construir_endereco(obj_end: Endereco, com_endereco: bool = True, com_cep: bool = False, com_cidade: bool = True, com_fone: bool = False,
-                       com_bairro: bool = True) -> str:
-    retorno = ''
-
-    def se_tem(texto: str = ' - '):
-        if len(retorno) > 0:
-            return texto
-        return ''
-
-    if com_endereco:
-        retorno += f'{obj_end.logradouro}, {obj_end.numero}{" - " if obj_end.complemento else ""}{obj_end.complemento}'
-    if com_bairro:
-        retorno += se_tem(', ') + f'{obj_end.bairro}'
-    if com_cep:
-        retorno += se_tem() + f'{f_cep(obj_end.cep)}'
-    if com_cidade:
-        retorno += se_tem() + f'{obj_end.municipio}/{obj_end.uf}'
-    if com_fone:
-        retorno += se_tem() + f'FONE: {f_fone(obj_end.telefone)}'
-    return retorno
+from .dfe import ler_data_hora, InfNFe
+from .dfepdf import DFePDF, FontePDF
+from .formatos import f_int_milhar, f_relevante, f_dec_milhar, f_cnpj, f_moeda, f_hora, f_fone, f_dma, f_cpf, f_espaco_a_cada, f_cst, \
+    f_dmah, f_ma, construir_endereco
 
 
 class NFe(object):
     def __init__(self, conteudo_xml: str):
         self.infNFe: InfNFe = None
         self.conteudo_xml: str = conteudo_xml
-        self.protocolo = ''
-        self.data_recebimento = None
+        self.protocolo: str = ''
+        self.data_recebimento: datetime = None
+        self.dado_qrcode: str = str()
         self.preencher()
 
     def preencher(self) -> None:
@@ -57,6 +40,8 @@ class NFe(object):
         for chave, valor in dado.items():
             if chave == 'infNFe':
                 self.infNFe = InfNFe(valor)
+            elif chave == 'infNFeSupl':
+                self.preencher_inf_nfe_suplementar(valor)
 
     def preencher_prot_nfe(self, dado: OrderedDict) -> None:
         for chave, valor in dado.items():
@@ -70,20 +55,31 @@ class NFe(object):
             elif chave == 'dhRecbto':
                 self.data_recebimento = ler_data_hora(valor)
 
+    def preencher_inf_nfe_suplementar(self, dado: OrderedDict) -> None:
+        for chave, valor in dado.items():
+            if chave == 'qrCode':
+                self.dado_qrcode = valor
+
     def gerar_pdf(self, caminho: str):
-        danfe = DANFe(self)
+        if self.infNFe.ide and self.infNFe.ide.modelo == 55:
+            danfe = DANFeNFe(self)
+        else:
+            danfe = DANFeNFCe(self)
         danfe.add_page()
         danfe.inserir_produtos()
         danfe.output(caminho, 'F')
 
     def gerar_pdf_stream(self) -> bytes:
-        danfe = DANFe(self)
+        if self.infNFe.ide and self.infNFe.ide.modelo == 55:
+            danfe = DANFeNFe(self)
+        else:
+            danfe = DANFeNFCe(self)
         danfe.add_page()
         danfe.inserir_produtos()
         return danfe.output(dest='S')
 
 
-class DANFe(DFePDF):
+class DANFeNFe(DFePDF):
     def __init__(self, nfe: NFe):
         super().__init__()
         self.nfe = nfe.infNFe
@@ -604,6 +600,130 @@ class DANFe(DFePDF):
             texto += f'Inf. Contribuinte: {self.nfe.informacao_adicionais.informacoes_complementares}\n'
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 25, texto, fonte, borda=False)
         posicao_y += 22
-        self.caixa_de_texto(self.x, posicao_y, self.largura_max, 6, f'IMPRESSO EM: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}', fonte, borda=False)
+        self.caixa_de_texto(self.x, posicao_y, self.largura_max, 6, f'IMPRESSO EM: {f_dmah(datetime.now())}', fonte, borda=False)
         self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, 6, f'SIGe | Desenvolvimento: TI - Casa Norte LTDA', fonte, borda=False,
                             alinhamento_h='R')
+
+
+class DANFeNFCe(DFePDF):
+    def __init__(self, nfe: NFe):
+        super().__init__()
+        self.nfe = nfe.infNFe
+        self.protocolo = nfe.protocolo
+        self.data_recebimento = nfe.data_recebimento
+        self.debugNFe = nfe
+        self.y_agora = 0
+        self.dado_qrcode = nfe.dado_qrcode
+
+    def inserir_produtos(self):
+        fonte = FontePDF(tamanho=9)
+        altura = 4
+        posicao_y = self.y
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, f'CNPJ: {f_cnpj(self.nfe.emitente.cnpj)} '
+                                                                                               f'{self.nfe.emitente.razao_social}', fonte, 'B', 'C', False)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, f'{self.nfe.emitente.fantasia}', fonte, 'B', 'C', False)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura,
+                                         f'{construir_endereco(self.nfe.emitente.endereco, com_cep=True)}', fonte, 'B', 'C', False)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, 'Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica',
+                                         fonte, 'B', 'C', False)
+        fonte.tamanho = 8
+        fonte.estilo = 'B'
+        self.configurar_fonte(fonte)
+        largura_vtotal = self.get_string_width('V TOTAL ')
+        largura_un = self.get_string_width(' UN ')
+        largura_maior = self.largura_max - self.x - largura_un - largura_vtotal * 5
+
+        self.caixa_de_texto(self.x, posicao_y, largura_vtotal, altura, 'CÓD.', fonte, 'B', 'R', False)
+        self.caixa_de_texto(self.x + largura_vtotal, posicao_y, largura_maior, altura, 'DESCRICAO', fonte, 'B', 'L', False)
+        self.caixa_de_texto(self.x + largura_vtotal + largura_maior, posicao_y, largura_vtotal, altura, 'QTDE', fonte, 'B', 'R', False)
+        self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior, posicao_y, largura_un, altura, 'UN', fonte, 'B', 'R', False)
+        self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.UNIT', fonte, 'B', 'R', False)
+        self.caixa_de_texto(self.x + largura_vtotal * 3 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.TOTAL', fonte, 'B', 'R', False)
+        posicao_y += self.caixa_de_texto(self.x + largura_vtotal * 4 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'TRIB', fonte, 'B', 'R',
+                                         False)
+        qt_total = Decimal()
+        fonte.estilo = ''
+        for seq, detalhe in self.nfe.detalhamento.items():
+            posicao_y = self.verifica_se_cabe(posicao_y)
+            produto = detalhe.produto
+            qt_total += produto.quantidade
+            self.caixa_de_texto(self.x, posicao_y, largura_vtotal, altura, produto.codigo, fonte, 'B', 'R', False)
+            self.caixa_de_texto(self.x + largura_vtotal, posicao_y, largura_maior, altura, produto.descricao, fonte, 'B', 'L', False)
+            self.caixa_de_texto(self.x + largura_vtotal + largura_maior, posicao_y, largura_vtotal, altura, f_relevante(produto.quantidade), fonte, 'B', 'R',
+                                False)
+            self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior, posicao_y, largura_un, altura, produto.unidade, fonte, 'B', 'R', False)
+            self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
+                                f_dec_milhar(produto.valor_unitario, 2), fonte, 'B', 'R', False)
+            self.caixa_de_texto(self.x + largura_vtotal * 3 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
+                                f_dec_milhar(produto.valor_total, 2), fonte, 'B', 'R', False)
+            posicao_y += self.caixa_de_texto(self.x + largura_vtotal * 4 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
+                                             f_dec_milhar(detalhe.imposto.total_tributos, 2), fonte, 'B', 'R', False)
+        posicao_y = self.verifica_se_cabe(posicao_y)
+        fonte.estilo = 'B'
+        self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'QDE. TOTAL DE ITENS', fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_relevante(qt_total), fonte, 'B', 'R', False)
+        posicao_y = self.verifica_se_cabe(posicao_y)
+        self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'VALOR TOTAL R$', fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_moeda(self.nfe.total.icms.valor_produtos), fonte, 'B',
+                                         'R', False)
+        posicao_y = self.verifica_se_cabe(posicao_y + altura / 2)
+        self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'FORMA PAGAMENTO', fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, 'VALOR PAGO R$', fonte, 'B', 'R', False)
+        for pagamento in self.nfe.pagamentos:
+            posicao_y = self.verifica_se_cabe(posicao_y)
+            if pagamento.cartao:
+                descricao = f'{pagamento.descricao_pagamento()} {pagamento.cartao.descricao_bandeira()} Aut={pagamento.cartao.autorizacao}'
+            else:
+                descricao = pagamento.descricao_pagamento()
+            self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, descricao, fonte, 'B', 'L', False)
+            posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_moeda(pagamento.valor), fonte, 'B', 'R', False)
+        url = parse_url(self.dado_qrcode)
+        posicao_y = self.verifica_se_cabe(posicao_y)
+        fonte.tamanho = 10
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, 'Consulte pela Chave de Acesso em', fonte, 'B', 'C', False)
+        fonte.estilo = ''
+        posicao_y = self.verifica_se_cabe(posicao_y)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura,
+                                         f'{url.scheme}://{url.host}{(":" + str(url.port)) if url.port else ""}{url.path}', fonte, 'B', 'C', False)
+        posicao_y = self.verifica_se_cabe(posicao_y)
+        posicao_y += 5 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, f_espaco_a_cada(self.nfe.id.replace('NFe', ''), 4), fonte, 'B', 'C',
+                                             False)
+        qr = qrcode.QRCode()
+        qr.add_data(self.dado_qrcode)
+        img = qr.make_image()
+        if self.verifica_se_cabe(posicao_y + 50) == self.y:
+            posicao_y = self.y
+        posicao_y_pulo = posicao_y + 50
+        posicao_x = self.x + 50
+        self.imagem_pil(img, self.x, posicao_y, 50, 50)
+        if self.nfe.destinatario:
+            dest = self.nfe.destinatario
+            documento = f'CPF: {f_cpf(dest.cpf)}' if dest.cpf else f'CNPJ: {f_cnpj(dest.cnpj)}'
+            nome = dest.razao_social if dest.razao_social else 'CONSUMIDOR FINAL'
+            linha_cliente = f'CONSUMIDOR {documento} - {nome}'
+        else:
+            linha_cliente = 'NÃO IDENTIFICADO'
+        linha_nfce = f'NFC-e Nº {f_int_milhar(self.nfe.ide.nf)}    Série: {self.nfe.ide.serie}    {f_dmah(self.nfe.ide.data_emissao)}'
+        fonte.estilo = 'B'
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, linha_cliente, fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, linha_nfce, fonte, 'B', 'L', False)
+        fonte.estilo = ''
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'Protocolo de autorização: {self.protocolo}', fonte, 'B',
+                                         'L', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'Data de autorização: {f_dmah(self.data_recebimento)}',
+                                         fonte, 'B', 'L', False)
+        if self.verifica_se_cabe(posicao_y_pulo + altura) == self.y:
+            posicao_y = self.y
+        posicao_y_pulo += self.caixa_de_texto(self.x, posicao_y_pulo, self.largura_max, altura,
+                                              f'Informação dos Tributos Totais Incidentes (Lei Federal 12.741/2012): '
+                                              f'{f_moeda(self.nfe.total.icms.valor_total_tributos)}', fonte, 'B', 'C', False)
+        fonte.tamanho = 6
+        self.caixa_de_texto(self.x, posicao_y_pulo, self.largura_max, altura,
+                            f'Gerado em {f_dmah(datetime.now())} pelo SIGe | Desenvolvimento: TI - Casa Norte LTDA', fonte, 'B', 'C', False)
+
+    def verifica_se_cabe(self, altura: float, cria_pagina: bool = True) -> float:
+        if self.y + altura > self.altura_max:
+            if cria_pagina:
+                self.add_page()
+            return self.y
+        return altura

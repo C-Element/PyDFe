@@ -23,6 +23,36 @@ class BaseObjDFe(object):
         pass
 
 
+class Cartao(BaseObjDFe):  # [#YA04]
+    def __init__(self, dado: OrderedDict):
+        self.autorizacao: str = str()  # Identifica o número da autorização da transação da operação com cartão de crédito e/ou débito :: <cAut> [#YA07]
+        self.bandeira: str = str()  # Bandeira da operadora de cartão de crédito e/ou débito 01=Visa; 02=Mastercard; 03=American Express; 04=Sorocred;
+        # 99=Outros :: <tBand> [#YA06]
+        self.cnpj: int = int()  # Informar o CNPJ da Credenciadora de cartão de crédito / débito :: <CNPJ> [#YA05]
+        super().__init__(dado)
+
+    def _preencher(self) -> None:
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'cAut':
+                self.autorizacao = ler_texto(valor)
+            elif chave == 'tBand':
+                self.bandeira = ler_texto(valor)
+            elif chave == 'CNPJ':
+                self.cnpj = int(valor)
+
+    def descricao_bandeira(self):
+        descricao = 'Outros'
+        if self.bandeira == '01':
+            descricao = 'Visa'
+        elif self.bandeira == '02':
+            descricao = 'Mastercard'
+        elif self.bandeira == '03':
+            descricao = 'American Express'
+        elif self.bandeira == '02':
+            descricao = 'Sorocred'
+        return descricao
+
+
 class Cobranca(BaseObjDFe):  # [#Y01]
     def __init__(self, dado: OrderedDict):
         self.duplicatas: ListaDuplicatas = []  # :: <dup> [#Y07]
@@ -933,6 +963,7 @@ class InfNFe(BaseObjDFe):  # [#A01]
         self.ide: IDe = None  # Identificação da NFe :: <ide> [#B01]
         self.id: str = str()  # Cheve NFe precedida da literal 'NFe' :: @Id [#A03]
         self.informacao_adicionais: InformcaoAdicional = None  # :: <infAdic> [#Z01]
+        self.pagamentos: List[Pagamento] = []  # Grupo de Formas de Pagamento obrigatório para a NFC-e, a critério da UF. :: <pag> [#YA01]
         self.retirada: EntregaRetirada = None  # Identificação do Local de retirada. Informar somente se diferente do endereço do
         # remetente. :: <retirada> [#F01]
         self.total: Total = None  # Grupo Totais da NF-e :: <total> [#W01]
@@ -964,6 +995,12 @@ class InfNFe(BaseObjDFe):  # [#A01]
                 self.id = ler_texto(valor)
             elif chave == 'infAdic':
                 self.informacao_adicionais = InformcaoAdicional(valor)
+            elif chave == 'pag':
+                if isinstance(valor, list):
+                    for pag in valor:
+                        self.pagamentos.append(Pagamento(pag))
+                else:
+                    self.pagamentos.append(Pagamento(valor))
             elif chave == 'retirada':
                 self.retirada = EntregaRetirada(valor)
             elif chave == 'total':
@@ -1165,6 +1202,46 @@ class ObservacaoContribuinte(BaseObjDFe):  # [#Z04]
 class ObservacaoFisco(ObservacaoContribuinte):  # [#Z07]
     def __init__(self, dado: OrderedDict):
         super().__init__(dado)
+
+
+class Pagamento(BaseObjDFe):  # [#YA01]
+    def __init__(self, dado: OrderedDict):
+        self.cartao: Cartao = None  # :: <card> [#YA04]
+        self.tipo: str = str()  # Forma de pagamento. 01=Dinheiro; 02=Cheque; 03=Cartão de Crédito; 04=Cartão de Débito; 05=Crédito Loja; 10=Vale Alimentação;
+        # 11=Vale Refeição; 12=Vale Presente; 13=Vale Combustível; 99=Outros :: <tPag> [#YA02]
+        self.valor: Decimal = Decimal()  # Valor do Pagamento :: <vPag> [#YA03]
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'card':
+                self.cartao = Cartao(valor)
+            elif chave == 'tPag':
+                self.tipo = ler_texto(valor)
+            elif chave == 'vPag':
+                self.valor = Decimal(valor)
+
+    def descricao_pagamento(self):
+        descricao = 'Outros'
+        if self.tipo == '01':
+            descricao = 'Dinheiro'
+        elif self.tipo == '02':
+            descricao = 'Cheque'
+        elif self.tipo == '03':
+            descricao = 'Cartão de Crédito'
+        elif self.tipo == '04':
+            descricao = 'Cartão de Débito'
+        elif self.tipo == '05':
+            descricao = 'Crédito Loja'
+        elif self.tipo == '10':
+            descricao = 'Vale Alimentação'
+        elif self.tipo == '11':
+            descricao = 'Vale Refeição'
+        elif self.tipo == '12':
+            descricao = 'Vale Presente'
+        elif self.tipo == '13':
+            descricao = 'Vale Combustível'
+        return descricao
 
 
 class PIS(BaseObjDFe):  # [#Q01]
