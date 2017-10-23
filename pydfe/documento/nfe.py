@@ -161,20 +161,19 @@ class DANFeNFe(DFePDF):
         ender = f'{construir_endereco(self.nfe.emitente.endereco, com_cep=True, com_cidade=False)}\n' \
                 f'{construir_endereco(self.nfe.emitente.endereco, False, False, True, True)}'
         self.caixa_de_texto(self.x, posicao_y, x, 12, ender, fonte, 'T', 'C', False)
-        fonte.tamanho = 12
+        fonte.tamanho = 10
         fonte.estilo = 'B'
         posicao_x += self.x
         posicao_y = y + self.caixa_de_texto(posicao_x, y, x2, 12, 'DANFE', fonte, 'T', 'C', False)
-        fonte.tamanho = 10
+        fonte.tamanho = 8
         fonte.estilo = ''
         entrada = '1 - ENTRADA'
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, 'Documento Auxiliar da Nota Fiscal Eletrônica', fonte, 'T', 'C', False) + 2
         a_quad = self.caixa_de_texto(posicao_x + 2, posicao_y, x2, 12, f'{entrada}\n2 - SAÍDA', fonte, 'T', 'L', False)
-        fonte.tamanho = 12
+        fonte.tamanho = 10
         fonte.estilo = 'B'
         posicao_y += self.caixa_de_texto(posicao_x + self.get_string_width(entrada) + 7, posicao_y, self.get_string_width('0000'), a_quad,
                                          str(self.nfe.ide.tipo_nf), fonte, 'B', 'C') + 2
-        fonte.tamanho = 10
         fonte.estilo = 'B'
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'{f_int_milhar(self.nfe.ide.nf)}', fonte, 'T', 'C', False)
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, f'SÉRIE {self.nfe.ide.serie}', fonte, 'T', 'C', False)
@@ -191,12 +190,12 @@ class DANFeNFe(DFePDF):
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f'CHAVE DE ACESSO', fonte, 'T', 'L', False) + 1
         fonte.tamanho = 9
         fonte.estilo = 'B'
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False) + 3
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False, forcar=True) + 3
         fonte.tamanho = 8
         fonte.estilo = ''
         self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8,
                             'Consulta de autenticidade no portal nacional da NF-e \nwww.nfe.fazenda.gov.br/portal ou no site da Sefaz Autorizadora', fonte,
-                            'T', 'C', False)
+                            'T', 'C', False, forcar=True)
         fonte.tamanho = 6
         posicao_y = y + a_cabecalho
         largura_ult_caixa = round(x * 0.85)
@@ -210,7 +209,7 @@ class DANFeNFe(DFePDF):
         posicao_y += 0.5 + self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.ide.natureza_operacao, fonte, 'B', 'L', False)
         if self.protocolo and self.data_recebimento:
             self.caixa_de_texto(self.x + largura_pri_caixa, y_temp, largura_ult_caixa, 6, f'{self.protocolo} - {f_dmah(self.data_recebimento)}', fonte, 'B',
-                                'C', False)
+                                'C', False, forcar=True)
         largura_pri_caixa = round(self.largura_max * 0.33) - self.x
         largura_ult_caixa = self.largura_max - (largura_pri_caixa * 2) - self.x
         fonte.tamanho = 6
@@ -293,7 +292,7 @@ class DANFeNFe(DFePDF):
         incremento_y = 0
         posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'FATURAS/DUPLICATAS', fonte, borda=False)
         posicao_x = self.x
-        fonte.tamanho = 10
+        fonte.tamanho = 9
         fonte.estilo = ''
         self.configurar_fonte(fonte)
         for duplicata in self.nfe.cobranca.duplicatas:
