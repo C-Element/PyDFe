@@ -295,6 +295,8 @@ class DANFeNFe(DFePDF):
         fonte.tamanho = 9
         fonte.estilo = ''
         self.configurar_fonte(fonte)
+        if self.nfe.cobranca is None:
+            return posicao_y + incremento_y
         for duplicata in self.nfe.cobranca.duplicatas:
             texto = f'{f_dma(duplicata.vencimento)} {duplicata.numero} {f_moeda(duplicata.valor)}'
             largura = self.get_string_width(texto) + 2
@@ -327,8 +329,7 @@ class DANFeNFe(DFePDF):
                             borda=False)
         self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_st), fonte, 'B', 'R', borda=False)
         posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6, f_dec_milhar(self.nfe.total.icms.valor_produtos),
-                                               fonte,
-                                               'B', 'R', borda=False)
+                                               fonte, 'B', 'R', borda=False)
 
         fonte.tamanho = 6
         fonte.estilo = ''
