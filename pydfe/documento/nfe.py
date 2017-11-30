@@ -103,6 +103,7 @@ class DANFeNFe(DFePDF):
         retorno = ''
         for refs in self.nfe.ide.documentos_referenciados:
             for doc in refs.chave_nfe_ref:
+                doc = str(doc)
                 retorno += f'\nNFe Ref.: série:{doc[22:25]} número:{doc[25:34]} emit:{f_cnpj(doc[6:20])} em {doc[4:6]}/20{doc[2:4]} [{f_espaco_a_cada(doc, 4)}]'
             for doc in refs.chave_cte_ref:
                 retorno += f'\nCTe Ref.: série:{doc[22:25]} número:{doc[25:34]} emit:{f_cnpj(doc[6:20])} em {doc[4:6]}/20{doc[2:4]} [{f_espaco_a_cada(doc, 4)}]'
@@ -288,6 +289,8 @@ class DANFeNFe(DFePDF):
         return posicao_y
 
     def duplicatas(self, posicao_y: int) -> int:
+        if self.nfe.cobranca is None:
+            return posicao_y
         fonte = FontePDF(tamanho=7, estilo='B')
         incremento_y = 0
         posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'FATURAS/DUPLICATAS', fonte, borda=False)
@@ -295,8 +298,6 @@ class DANFeNFe(DFePDF):
         fonte.tamanho = 9
         fonte.estilo = ''
         self.configurar_fonte(fonte)
-        if self.nfe.cobranca is None:
-            return posicao_y + incremento_y
         for duplicata in self.nfe.cobranca.duplicatas:
             texto = f'{f_dma(duplicata.vencimento)} {duplicata.numero} {f_moeda(duplicata.valor)}'
             largura = self.get_string_width(texto) + 2
