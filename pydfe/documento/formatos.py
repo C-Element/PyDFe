@@ -100,6 +100,8 @@ def f_cst(cst: int) -> str:
 
 
 def f_relevante(valor: Decimal) -> str:
+    if valor == Decimal():
+        return '0'
     return str(Decimal(str(round(valor, 5)).strip('0'))).replace('.', ',')
 
 
