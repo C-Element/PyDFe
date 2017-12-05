@@ -597,7 +597,7 @@ class DANFeNFe(DFePDF):
         posicao_y += 1 + self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 25, 'RESERVADO AO FISCO', fonte)
         texto += self.construir_documentos_referenciados()
 
-        if self.nfe.informacao_adicionais.informacoes_complementares:
+        if self.nfe.informacao_adicionais and self.nfe.informacao_adicionais.informacoes_complementares:
             texto += f'Inf. Contribuinte: {self.nfe.informacao_adicionais.informacoes_complementares}\n'
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 25, texto, fonte, borda=False)
         posicao_y += 22
