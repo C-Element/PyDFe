@@ -1720,6 +1720,8 @@ class TransporteVolume(BaseObjDFe):  # :: <vol> [#X26]
         super().__init__(dado)
 
     def _preencher(self):
+        if not hasattr(self._conteudo_xml, 'items'):
+            return
         for chave, valor in self._conteudo_xml.items():
             if chave == 'esp':
                 self.especie = ler_texto(valor)
