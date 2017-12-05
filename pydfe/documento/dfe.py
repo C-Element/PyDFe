@@ -780,7 +780,7 @@ class IDe(BaseObjDFe):  # [#B01]
     # justificativa_ccontigencia: str = str()  # Justificativa da entrada em contingência
     def __init__(self, dado: OrderedDict):
         self.cnf: int = int()  # Código numérico que compõe a Chave de Acesso. Número aleatório gerado pelo emitente :: <cNF> [#B03]
-        self.data_emissao: datetime = None  # Data/Hora da emissão <dhEmi> [#B09]
+        self.data_emissao: datetime = None  # Data/Hora da emissão <dhEmi(V3)|dEmi(V2)> [#B09]
         self.data_saida_entrada: datetime = None  # Data/Hora da saída/entrada <dhSaiEnt > [#B10]
         self.documentos_referenciados: ListaDocumentoReferenciado = []  # Informação de Documentos Fiscais referenciados :: <NFref> #[#BA01]
         self.dv: int = int()  # DV da chave de acesso :: <cDV> [#B23]
@@ -817,6 +817,8 @@ class IDe(BaseObjDFe):  # [#B01]
                 self.cnf = int(valor)
             elif chave == 'dhEmi':
                 self.data_emissao = ler_data_hora(valor)
+            elif chave == 'dEmi':
+                self.data_emissao = ler_data_hora(valor+'T00:00:00')
             elif chave == 'dhSaiEnt':
                 self.data_saida_entrada = ler_data_hora(valor)
             elif chave == 'NFref':
