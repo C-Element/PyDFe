@@ -1156,7 +1156,10 @@ class NFeReferenciada(BaseObjDFe):  # [#BA03]
             if chave == 'CNPJ':
                 self.cnpj = int(valor)
             elif chave == 'AAMM':
-                self.emissao = ler_data(valor, formato_data_ano_mes)
+                try:
+                    self.emissao = ler_data(valor, formato_data_ano_mes)
+                except:
+                    self.emissao = ler_data(valor, '%y%m')
             elif chave == 'mod':
                 self.modelo = int(valor)
             elif chave == 'nNF':
