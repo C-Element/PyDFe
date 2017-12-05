@@ -1799,7 +1799,10 @@ def ler_data(texto: str, formato: str = formato_data_padrao) -> date:
 
 
 def ler_data_hora(texto: str) -> datetime:
-    return datetime.strptime(texto[:22] + texto[23:], '%Y-%m-%dT%H:%M:%S%z')
+    try:
+        return datetime.strptime(texto[:22] + texto[23:], '%Y-%m-%dT%H:%M:%S%z')
+    except:
+        return datetime.strptime(texto[:22] + texto[23:], '%Y-%m-%dT%H:%M:%S')
 
 
 def ler_texto(texto: str) -> str:
