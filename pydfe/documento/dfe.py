@@ -1033,7 +1033,28 @@ class InfDocumentosMDFe(BaseObjDFe):
                     self.municipios_descarga.append(MunicipioDescarregamento(valor))
 
 
-class InfMDFe(BaseObjDFe):  # ]
+class InfEvento(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.id: str = str()  # Identificador da TAG a ser assinada, a regra de formação do Id é: “ID” + tpEvento + chave da NF-e + nSeqEvento :: @Id
+        self.chave_nfe: int = int()  # Chave de Acesso da NF-e vinculada ao Evento :: <chNFe>
+        self.cnpj_cpf: int = int()  # Chave de Acesso da NF-e vinculada ao Evento :: <CNPJ|CPF>
+        self.data_evento: datetime = None  # Data e hora do evento :: <dhEvento>
+
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'chNFe':
+                self.chave_nfe = int(valor)
+            elif chave == 'CNPJ' or chave == 'CPF':
+                self.cnpj_cpf = int(valor)
+            elif chave == '@Id':
+                self.id = ler_texto(valor)
+            elif chave == 'dhEvento':
+                self.data_evento = ler_data_hora(valor)
+
+
+class InfMDFe(BaseObjDFe):
     def __init__(self, dado: OrderedDict):
         self.destinatario: Destinatario = None  # Identificação do Destinatário da NF-e  :: <dest> [#E01]  // Apenas para compatibilidade
         self.documentos: InfDocumentosMDFe = None  # Identificação do emitente da NF-e :: <emit> [#C01]
@@ -1050,7 +1071,7 @@ class InfMDFe(BaseObjDFe):  # ]
                 self.ide = IDe(valor)
             elif chave == '@Id':
                 self.id = ler_texto(valor)
-            
+
 
 class InfNFe(BaseObjDFe):  # [#A01]
     def __init__(self, dado: OrderedDict):
