@@ -183,6 +183,31 @@ class COFINSST(COFINSOutros):  # [#T01]
         super().__init__(dado)
 
 
+class ConhecimentoTransporte(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.chave: int = int()  # Chave do CTe :: <chCTe>
+        self.indicador_reentrega: int = int()  # :: <indReentrega>
+        self.segundo_codigo_barras: int = int()  # :: <SegCodBarra>
+        self.unidades_transporte: ListaUnidadesTransporte = []  # Informações das Unidades de Transporte (Carreta/Reboque/Vagão) :: <infUnidTransp>
+
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'chCTe':
+                self.chave = int(valor)
+            elif chave == 'indReentrega':
+                self.indicador_reentrega = int(valor)
+            elif chave == 'SegCodBarra':
+                self.segundo_codigo_barras = int(valor)
+            elif chave == 'infUnidTransp':
+                if isinstance(valor, list):
+                    for unidade in valor:
+                        self.unidades_transporte.append(UnidadeTransporte(unidade))
+                else:
+                    self.unidades_transporte.append(UnidadeTransporte(valor))
+
+
 class Destinatario(BaseObjDFe):  # [#E01]
     def __init__(self, dado: OrderedDict):
         self.cnpj: int = int()  # :: <CNPJ> [#E02]
@@ -379,6 +404,7 @@ class Endereco(BaseObjDFe):  # [#C05]
         self.codigo_municipio: int = int()  # :: <cMun> [#C10] [#E10]
         self.codigo_pais: int = int()  # :: <cPais> [#C14] [#E14]
         self.complemento: str = str()  # :: <xCpl> [#C08] [#E08]
+        self.email: str = str()  # :: <email>
         self.logradouro: str = str()  # :: <xLgr> [#C06] [#E06]
         self.municipio: str = str()  # :: <xMun> [#C11] [#E11]
         self.numero: str = str()  # :: <nro> [#C07] [#E07]
@@ -399,6 +425,8 @@ class Endereco(BaseObjDFe):  # [#C05]
                 self.codigo_pais = int(valor)
             elif chave == 'xCpl':
                 self.complemento = ler_texto(valor)
+            elif chave == 'email':
+                self.email = ler_texto(valor)
             elif chave == 'xLgr':
                 self.logradouro = ler_texto(valor)
             elif chave == 'xMun':
@@ -780,6 +808,7 @@ class IDe(BaseObjDFe):  # [#B01]
     # justificativa_ccontigencia: str = str()  # Justificativa da entrada em contingência
     def __init__(self, dado: OrderedDict):
         self.cnf: int = int()  # Código numérico que compõe a Chave de Acesso. Número aleatório gerado pelo emitente :: <cNF> [#B03]
+        self.cmdf: int = int()  # Código numérico que compõe a Chave de Acesso. Número aleatório gerado pelo emitente :: <cMDF>
         self.data_emissao: datetime = None  # Data/Hora da emissão <dhEmi(V3)|dEmi(V2)> [#B09]
         self.data_saida_entrada: datetime = None  # Data/Hora da saída/entrada <dhSaiEnt > [#B10]
         self.documentos_referenciados: ListaDocumentoReferenciado = []  # Informação de Documentos Fiscais referenciados :: <NFref> #[#BA01]
@@ -791,10 +820,14 @@ class IDe(BaseObjDFe):  # [#B01]
         self.indicador_presenca: int = int()  # Indicador de presença dp comprador. 0=Não se aplica (por exemplo, Nota Fiscal complementar ou de ajuste);
         # 1=Operação presencial; 2=Operação não presencial, pela Internet; 3=Operação não presencial, Teleatendimento; 4=NFC-e em operação com entrega a
         # domicílio; 9=Operação não presencial,  outros. :: <indPres> [#B25b]
-        self.modelo: int = 55  # Código do Modelo do DFe. 55=NFe; 65=NFCe <mod> [#B06]
+        self.modalidade: int = 1  # Modalidade do transporte. 1 - Rodoviário; 2 - Aéreo; 3 - Aquaviário; 4 - Ferroviário.  :: <modal>
+        self.modelo: int = 55  # Código do Modelo do DFe. 55=NFe; 65=NFCe; 58=MDFe :: <mod> [#B06]
         self.municipio: int = int()  # Código do Município de Ocorrência <cMunFG> [#B12]
+        self.municipios_carregamentos: ListaMunicipiosCarregamento = []  # Informações dos Municípios de Carregamento :: <infMunCarrega>
         self.natureza_operacao: str = str()  # Descrição da Natureza da Operação :: <natOp> [#B04]
-        self.nf: int = int()  # Número do DFe <nNF> [#B08]
+        self.nf: int = int()  # Número do DFe :: <nNF> [#B08]
+        self.mdf: int = int()  # Número do MDFe :: <nMDF>
+        self.percurso_mdfe: ListaPercursosMDFe = []  # Informações do Percurso do MDF-e :: <infPercurso>
         self.processo_emissao: int = int()  # Processo de emissão da NF-e. 0=Emissão de NF-e com aplicativo do contribuinte; 1=Emissão de NF-e avulsa pelo
         # Fisco; 2=Emissão de NF-e avulsa, pelo contribuinte com seu certificado digital, através do site do Fisco; 3=Emissão NF-e pelo contribuinte com
         # aplicativo fornecido pelo Fisco. :: <procEmi> [#B26]
@@ -805,9 +838,14 @@ class IDe(BaseObjDFe):  # [#B01]
         # 5=Contingência FS-DA, com impressão do DANFE em formulário de segurança; 6=Contingência SVC-AN (SEFAZ Virtual de Contingência do AN); 7=Contingência
         # SVC-RS (SEFAZ Virtual de Contingência do RS); 9=Contingência off-line da NFC-e (as demais opções de contingência são válidas também para a NFC-e).
         # Para a NFC-e somente estão disponíveis e são válidas as opções de contingência 5 e 9. :: <tpEmis> [#B22]
-        self.tipo_impressao: int = 1  # Formato de Impressão do DANFE  <tpImp> [#B21]
+        self.tipo_emitente: int = 1  # 1 - Prestador de serviço de transporte; 2 - Transportador de Carga Própria OBS: Deve ser preenchido com 2 para emitentes
+        # de NF-e e pelas transportadoras quando estiverem fazendo transporte de carga própria :: <tpEmit>
+        self.tipo_impressao: int = 1  # Formato de Impressão do DANFE :: <tpImp> [#B21]
+        self.tipo_transportador: int = 1  # 1 - ETC; 2 - TAC; 3 - CTC :: <tpTransp>
         self.tipo_nf: int = int()  # Tipo de operação. 0=Entrada; 1=Saída :: <tpNF> [#B11]
         self.uf: str = str()  # Código da UF do emitente do DFe :: <cUF> [#B02]
+        self.uf_carregamento: str = str()  # Código da UF de carregamento :: <UFIni>
+        self.uf_descarregamento: str = str()  # Código da UF de descarregamento :: <UFFim>
         self.versao_processo: str = str()  # Versão do Processo de emissão da NF-e :: <verProc> [#B27]
         super().__init__(dado)
 
@@ -815,10 +853,12 @@ class IDe(BaseObjDFe):  # [#B01]
         for chave, valor in self._conteudo_xml.items():
             if chave == 'cNF':
                 self.cnf = int(valor)
+            elif chave == 'cMDF':
+                self.cmdf = int(valor)
             elif chave == 'dhEmi':
                 self.data_emissao = ler_data_hora(valor)
             elif chave == 'dEmi':
-                self.data_emissao = ler_data_hora(valor+'T00:00:00')
+                self.data_emissao = ler_data_hora(valor + 'T00:00:00')
             elif chave == 'dhSaiEnt':
                 self.data_saida_entrada = ler_data_hora(valor)
             elif chave == 'NFref':
@@ -841,14 +881,30 @@ class IDe(BaseObjDFe):  # [#B01]
                 self.indicador_pagamento = int(valor)
             elif chave == 'indPres':
                 self.indicador_presenca = int(valor)
+            elif chave == 'infMunCarrega':
+                if isinstance(valor, list):
+                    for municipio_carregamento in valor:
+                        self.municipios_carregamentos.append(MunicipioCarregamento(municipio_carregamento))
+                else:
+                    self.municipios_carregamentos.append(MunicipioCarregamento(valor))
             elif chave == 'mod':
                 self.modelo = int(valor)
+            elif chave == 'modal':
+                self.modalidade = int(valor)
             elif chave == 'cMunFG':
                 self.municipio = int(valor)
             elif chave == 'natOp':
                 self.natureza_operacao = ler_texto(valor)
             elif chave == 'nNF':
                 self.nf = int(valor)
+            elif chave == 'nMDF':
+                self.mdf = int(valor)
+            elif chave == 'infPercurso':
+                if isinstance(valor, list):
+                    for percurso in valor:
+                        self.percurso_mdfe.append(PercusrsoMDFe(percurso))
+                else:
+                    self.percurso_mdfe.append(PercusrsoMDFe(valor))
             elif chave == 'procEmi':
                 self.processo_emissao = int(valor)
             elif chave == 'serie':
@@ -857,12 +913,20 @@ class IDe(BaseObjDFe):  # [#B01]
                 self.tipo_ambiente = int(valor)
             elif chave == 'tpEmis':
                 self.tipo_emissao = int(valor)
+            elif chave == 'tpEmit':
+                self.tipo_emitente = int(valor)
             elif chave == 'tpImp':
                 self.tipo_impressao = int(valor)
+            elif chave == 'tpTransp':
+                self.tipo_transportador = int(valor)
             elif chave == 'tpNF':
                 self.tipo_nf = int(valor)
             elif chave == 'cUF':
                 self.uf = ler_texto(valor)
+            elif chave == 'UFIni':
+                self.uf_carregamento = ler_texto(valor)
+            elif chave == 'UFFim':
+                self.uf_descarregamento = ler_texto(valor)
             elif chave == 'verProc':
                 self.versao_processo = ler_texto(valor)
 
@@ -952,6 +1016,82 @@ class InformcaoAdicional(BaseObjDFe):  # [#Z01]
                         self.observacoes_fisco.append(ObservacaoFisco(obs))
                 else:
                     self.observacoes_fisco.append(ObservacaoFisco(valor))
+
+
+class InfDocumentosMDFe(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.municipios_descarga: ListaMunicipiosDescarregamento = []  # :: <infMunDescarga>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'infMunDescarga':
+                if isinstance(valor, list):
+                    for municipio_descarga in valor:
+                        self.municipios_descarga.append(MunicipioDescarregamento(municipio_descarga))
+                else:
+                    self.municipios_descarga.append(MunicipioDescarregamento(valor))
+
+
+class InfMDFe(BaseObjDFe):  # ]
+    def __init__(self, dado: OrderedDict):
+        # self.cobranca: Cobranca = None  # Grupo Cobrança :: <cobr> [#Y01]
+        # self.destinatario: Destinatario = None  # Identificação do Destinatário da NF-e  :: <dest> [#E01]
+        # self.detalhamento: DetalhesProduto = dict()  # Detalhamento de Produtos e Serviços :: <det> [#H01]
+        self.documentos: InfDocumentosMDFe = None  # Identificação do emitente da NF-e :: <emit> [#C01]
+        self.emitente: Emitente = None  # Identificação do emitente da NF-e :: <emit> [#C01]
+        # self.entrega: EntregaRetirada = None  # Identificação do Local de entrega. Informar somente se diferente do endereço
+        # destinatário. :: <entrega> [#F01]
+        self.ide: IDe = None  # Identificação da NFe :: <ide> [#B01]
+        self.id: str = str()  # Cheve NFe precedida da literal 'NFe' :: @Id [#A03]
+        # self.informacao_adicionais: InformcaoAdicional = None  # :: <infAdic> [#Z01]
+        # self.pagamentos: List[Pagamento] = []  # Grupo de Formas de Pagamento obrigatório para a NFC-e, a critério da UF. :: <pag> [#YA01]
+        # self.retirada: EntregaRetirada = None  # Identificação do Local de retirada. Informar somente se diferente do endereço do
+        # remetente. :: <retirada> [#F01]
+        # self.total: Total = None  # Grupo Totais da NF-e :: <total> [#W01]
+        # self.transporte: Transporte = None  # Grupo Informações do Transporte :: <transp> [#X01]
+        # self.versao: str = str()  # Versão do layout NFe :: @versao [#A02]
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            # if chave == 'cobr':
+            #    self.cobranca = Cobranca(valor)
+            # elif chave == 'dest':
+            #    self.destinatario = Destinatario(valor)
+            # elif chave == 'det':
+            #    if isinstance(valor, list):
+            #        for det in valor:
+            #            temp = Detalhamento(det)
+            #            self.detalhamento[temp.numero_item] = temp
+            #    else:
+            #        temp = Detalhamento(valor)
+            #        self.detalhamento[temp.numero_item] = temp
+            # el
+            if chave == 'emit':
+                self.emitente = Emitente(valor)
+            # elif chave == 'entrega':
+            #    self.entrega = EntregaRetirada(valor)
+            elif chave == 'ide':
+                self.ide = IDe(valor)
+            elif chave == '@Id':
+                self.id = ler_texto(valor)
+                # elif chave == 'infAdic':
+                #    self.informacao_adicionais = InformcaoAdicional(valor)
+                # elif chave == 'pag':
+                #    if isinstance(valor, list):
+                #        for pag in valor:
+                #            self.pagamentos.append(Pagamento(pag))
+                #    else:
+                #        self.pagamentos.append(Pagamento(valor))
+                # elif chave == 'retirada':
+                #    self.retirada = EntregaRetirada(valor)
+                # elif chave == 'total':
+                #    self.total = Total(valor)
+                # elif chave == 'transp':
+                #    self.transporte = Transporte(valor)
+                # elif chave == '@versao':
+                #    self.versao = ler_texto(valor)
 
 
 class InfNFe(BaseObjDFe):  # [#A01]
@@ -1170,6 +1310,41 @@ class NFeReferenciada(BaseObjDFe):  # [#BA03]
                 self.uf = ler_texto(valor)
 
 
+class MunicipioCarregamento(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.codigo_municipio: int = int()  # Código do municipio de carregamento. :: <cMunCarrega>
+        self.municipio: str = str()  # Nome do municipio de carregamento :: <xMunCarrega>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'cMunCarrega':
+                self.codigo_municipio = int(valor)
+            elif chave == 'xMunCarrega':
+                self.municipio = ler_texto(valor)
+
+
+class MunicipioDescarregamento(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.codigo_municipio: int = int()  # Código do municipio de descarregamento. :: <cMunDescarga>
+        self.conhecimentos_transporte: ListaConhecimentosTransporte = []  # :: <infCTe>
+        self.municipio: str = str()  # Nome do municipio de descarregamento :: <xMunDescarga>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'cMunDescarga':
+                self.codigo_municipio = int(valor)
+            elif chave == 'xMunDescarga':
+                self.municipio = ler_texto(valor)
+            elif chave == 'infCTe':
+                if isinstance(valor, list):
+                    for conhecimento in valor:
+                        self.conhecimentos_transporte.append(ConhecimentoTransporte(conhecimento))
+                else:
+                    self.conhecimentos_transporte.append(ConhecimentoTransporte(valor))
+
+
 class NFeReferenciadaProdutoRural(NFeReferenciada):  # [#BA10]
 
     def __init__(self, dado: OrderedDict):
@@ -1247,6 +1422,20 @@ class Pagamento(BaseObjDFe):  # [#YA01]
         elif self.tipo == '13':
             descricao = 'Vale Combustível'
         return descricao
+
+
+class PercusrsoMDFe(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.inicio_viagem: datetime = None  # Data e hora previstos de inicio da viagem :: <dhIniViagem>
+        self.uf: str = str()  # Sigla das Unidades da Federação do percurso do veículo. OBS: Não é necessário repetir as UF de Início e Fim :: <UFPer>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'dhIniViagem':
+                self.inicio_viagem = ler_data_hora(valor)
+            elif chave == 'PISNT':
+                self.uf = ler_texto(valor)
 
 
 class PIS(BaseObjDFe):  # [#Q01]
@@ -1773,6 +1962,63 @@ class TributoDevolvidoIPI(BaseObjDFe):  # [#UA03]
                 self.valor = Decimal(valor)
 
 
+class UnidadeTransporte(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.id: str = str()  # Identificação da Unidade de Transporte :: <idUnidTransp>
+        self.lacres: ListaLacres = []  # :: <lacUnidTransp>
+        self.quantidade_rateio: Decimal = Decimal()  # :: <qtdRat>
+        self.tipo_unidade: int = int()  # 1 - Rodoviário Tração; 2 - Rodoviário Reboque; 3 - Navio; 4 - Balsa; 5 - Aeronave; 6 - Vagão;
+        # 7 - Outros :: <tpUnidTransp>
+        self.unidades_carga: ListaUnidadesCarga = []  # Informações das Unidades de Carga (Containeres/ULD/Outros) :: <infUnidCarga>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'idUnidTransp':
+                self.id = ler_texto(valor)
+            elif chave == 'lacUnidTransp':
+                if isinstance(valor, list):
+                    for lacre in valor:
+                        self.lacres.append(VolumeLacre(lacre))
+                else:
+                    self.lacres.append(VolumeLacre(valor))
+            elif chave == 'tpUnidTransp':
+                self.tipo_unidade = int(valor)
+            elif chave == 'infUnidCarga':
+                if isinstance(valor, list):
+                    for unidade in valor:
+                        self.unidades_carga.append(UnidadeCarga(unidade))
+                else:
+                    self.unidades_carga.append(UnidadeCarga(valor))
+
+            elif chave == 'qtdRat':
+                self.quantidade_rateio = Decimal(valor)
+
+
+class UnidadeCarga(BaseObjDFe):
+    def __init__(self, dado: OrderedDict):
+        self.id: str = str()  # Identificação da Unidade de Transporte :: <idUnidCarga>
+        self.lacres: ListaLacres = []  # :: <lacUnidCarga>
+        self.quantidade_rateio: Decimal = Decimal()  # :: <qtdRat>
+        self.tipo_unidade: int = int()  # 1 - Container; 2 - ULD; 3 - Pallet; 4 - Outros;  :: <tpUnidCarga>
+        super().__init__(dado)
+
+    def _preencher(self):
+        for chave, valor in self._conteudo_xml.items():
+            if chave == 'idUnidCarga':
+                self.id = ler_texto(valor)
+            elif chave == 'lacUnidCarga':
+                if isinstance(valor, list):
+                    for lacre in valor:
+                        self.lacres.append(VolumeLacre(lacre))
+                else:
+                    self.lacres.append(VolumeLacre(valor))
+            elif chave == 'tpUnidCarga':
+                self.tipo_unidade = int(valor)
+            elif chave == 'qtdRat':
+                self.quantidade_rateio = Decimal(valor)
+
+
 class VolumeLacre(BaseObjDFe):  # [#X33]
 
     def __init__(self, dado: OrderedDict):
@@ -1787,13 +2033,19 @@ class VolumeLacre(BaseObjDFe):  # [#X33]
 
 # Tipos
 DetalhesProduto = Dict[int, Detalhamento]
+ListaConhecimentosTransporte = List[ConhecimentoTransporte]
 ListaDocumentoReferenciado = List[DocumentoReferenciado]
 ListaDuplicatas = List[Duplicata]
 ListaLacres = List[VolumeLacre]
+ListaMunicipiosCarregamento = List[MunicipioCarregamento]
+ListaMunicipiosDescarregamento = List[MunicipioDescarregamento]
 ListaObservacoesContribuinte = List[ObservacaoContribuinte]
 ListaObservacoesFisco = List[ObservacaoFisco]
+ListaPercursosMDFe = List[PercusrsoMDFe]
 ListaTransporteReboques = List[TransporteReboque]
 ListaTransporteVolumes = List[TransporteVolume]
+ListaUnidadesTransporte = List[UnidadeTransporte]
+ListaUnidadesCarga = List[UnidadeCarga]
 
 # formato
 formato_data_padrao = '%Y-%m-%d'
