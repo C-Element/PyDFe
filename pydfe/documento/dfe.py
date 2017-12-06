@@ -1035,64 +1035,22 @@ class InfDocumentosMDFe(BaseObjDFe):
 
 class InfMDFe(BaseObjDFe):  # ]
     def __init__(self, dado: OrderedDict):
-        # self.cobranca: Cobranca = None  # Grupo Cobrança :: <cobr> [#Y01]
-        # self.destinatario: Destinatario = None  # Identificação do Destinatário da NF-e  :: <dest> [#E01]
-        # self.detalhamento: DetalhesProduto = dict()  # Detalhamento de Produtos e Serviços :: <det> [#H01]
+        self.destinatario: Destinatario = None  # Identificação do Destinatário da NF-e  :: <dest> [#E01]  // Apenas para compatibilidade
         self.documentos: InfDocumentosMDFe = None  # Identificação do emitente da NF-e :: <emit> [#C01]
         self.emitente: Emitente = None  # Identificação do emitente da NF-e :: <emit> [#C01]
-        # self.entrega: EntregaRetirada = None  # Identificação do Local de entrega. Informar somente se diferente do endereço
-        # destinatário. :: <entrega> [#F01]
         self.ide: IDe = None  # Identificação da NFe :: <ide> [#B01]
         self.id: str = str()  # Cheve NFe precedida da literal 'NFe' :: @Id [#A03]
-        # self.informacao_adicionais: InformcaoAdicional = None  # :: <infAdic> [#Z01]
-        # self.pagamentos: List[Pagamento] = []  # Grupo de Formas de Pagamento obrigatório para a NFC-e, a critério da UF. :: <pag> [#YA01]
-        # self.retirada: EntregaRetirada = None  # Identificação do Local de retirada. Informar somente se diferente do endereço do
-        # remetente. :: <retirada> [#F01]
-        # self.total: Total = None  # Grupo Totais da NF-e :: <total> [#W01]
-        # self.transporte: Transporte = None  # Grupo Informações do Transporte :: <transp> [#X01]
-        # self.versao: str = str()  # Versão do layout NFe :: @versao [#A02]
         super().__init__(dado)
 
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
-            # if chave == 'cobr':
-            #    self.cobranca = Cobranca(valor)
-            # elif chave == 'dest':
-            #    self.destinatario = Destinatario(valor)
-            # elif chave == 'det':
-            #    if isinstance(valor, list):
-            #        for det in valor:
-            #            temp = Detalhamento(det)
-            #            self.detalhamento[temp.numero_item] = temp
-            #    else:
-            #        temp = Detalhamento(valor)
-            #        self.detalhamento[temp.numero_item] = temp
-            # el
             if chave == 'emit':
                 self.emitente = Emitente(valor)
-            # elif chave == 'entrega':
-            #    self.entrega = EntregaRetirada(valor)
             elif chave == 'ide':
                 self.ide = IDe(valor)
             elif chave == '@Id':
                 self.id = ler_texto(valor)
-                # elif chave == 'infAdic':
-                #    self.informacao_adicionais = InformcaoAdicional(valor)
-                # elif chave == 'pag':
-                #    if isinstance(valor, list):
-                #        for pag in valor:
-                #            self.pagamentos.append(Pagamento(pag))
-                #    else:
-                #        self.pagamentos.append(Pagamento(valor))
-                # elif chave == 'retirada':
-                #    self.retirada = EntregaRetirada(valor)
-                # elif chave == 'total':
-                #    self.total = Total(valor)
-                # elif chave == 'transp':
-                #    self.transporte = Transporte(valor)
-                # elif chave == '@versao':
-                #    self.versao = ler_texto(valor)
-
+            
 
 class InfNFe(BaseObjDFe):  # [#A01]
     def __init__(self, dado: OrderedDict):
