@@ -244,9 +244,9 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, 'DATA DA EMISSÃO', fonte)
         fonte.tamanho = 10
         if self.nfe.destinatario.cnpj:
-            cnpj_cpf = f_cpf(self.nfe.destinatario.cnpj)
+            cnpj_cpf = f_cnpj(self.nfe.destinatario.cnpj)
         else:
-            cnpj_cpf = f_cnpj(self.nfe.destinatario.cpf)
+            cnpj_cpf = f_cpf(self.nfe.destinatario.cpf)
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.razao_social, fonte, 'B', borda=False, forcar=True)
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6, cnpj_cpf, fonte, 'B', 'R', borda=False)
         posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, f_dma(self.nfe.ide.data_emissao),
