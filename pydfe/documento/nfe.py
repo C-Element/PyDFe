@@ -133,7 +133,8 @@ class DANFeNFe(DFePDF):
         fonte.estilo = ''
         x = round(largura * 0.2)
         self.caixa_de_texto(self.x, y, x, 10, 'DATA DE RECEBIMENTO', fonte, forcar=False)
-        self.caixa_de_texto(self.x + x, y, self.largura_max - x - div_d - self.x, 10, 'IDENTIFICAÇÃO E ASSINATURA DO RECEBEDOR', fonte, forcar=False)
+        self.caixa_de_texto(self.x + x, y, self.largura_max - x - div_d - self.x, 10, 'IDENTIFICAÇÃO E ASSINATURA DO RECEBEDOR', fonte,
+                            forcar=False)
         y = self.y + 22
         self.dashed_line(self.x, y, self.largura_max, y)
         return y + 2
@@ -155,7 +156,8 @@ class DANFeNFe(DFePDF):
         posicao_y += self.caixa_de_texto(self.x, y, x, tamanho, "IDENTIFICAÇÃO DO EMITENTE", fonte, 'T', 'C', False) + 2
         fonte.tamanho = 12
         fonte.estilo = 'B'
-        posicao_y += self.caixa_de_texto(self.x, posicao_y, x, 12, f'{self.nfe.emitente.razao_social} - {self.nfe.emitente.fantasia}', fonte, 'T',
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, x, 12, f'{self.nfe.emitente.razao_social} - {self.nfe.emitente.fantasia}',
+                                         fonte, 'T',
                                          'C', False) + 2
         fonte.tamanho = 8
         fonte.estilo = ''
@@ -169,7 +171,8 @@ class DANFeNFe(DFePDF):
         fonte.tamanho = 8
         fonte.estilo = ''
         entrada = '1 - ENTRADA'
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, 'Documento Auxiliar da Nota Fiscal Eletrônica', fonte, 'T', 'C', False) + 2
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, x2, 12, 'Documento Auxiliar da Nota Fiscal Eletrônica', fonte, 'T', 'C',
+                                         False) + 2
         a_quad = self.caixa_de_texto(posicao_x + 2, posicao_y, x2, 12, f'{entrada}\n2 - SAÍDA', fonte, 'T', 'L', False)
         fonte.tamanho = 10
         fonte.estilo = 'B'
@@ -191,11 +194,13 @@ class DANFeNFe(DFePDF):
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f'CHAVE DE ACESSO', fonte, 'T', 'L', False) + 1
         fonte.tamanho = 9
         fonte.estilo = 'B'
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False, forcar=True) + 3
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8, f_espaco_a_cada(chave_nfe, 4), fonte, 'T', 'L', False,
+                                         forcar=True) + 3
         fonte.tamanho = 8
         fonte.estilo = ''
         self.caixa_de_texto(posicao_x, posicao_y, largura_ult_caixa, 8,
-                            'Consulta de autenticidade no portal nacional da NF-e \nwww.nfe.fazenda.gov.br/portal ou no site da Sefaz Autorizadora', fonte,
+                            'Consulta de autenticidade no portal nacional da NF-e \nwww.nfe.fazenda.gov.br/portal ou no site da Sefaz Autorizadora',
+                            fonte,
                             'T', 'C', False, forcar=True)
         fonte.tamanho = 6
         posicao_y = y + a_cabecalho
@@ -207,9 +212,11 @@ class DANFeNFe(DFePDF):
         fonte.tamanho = 9
         fonte.estilo = 'B'
         y_temp = posicao_y
-        posicao_y += 0.5 + self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.ide.natureza_operacao, fonte, 'B', 'L', False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.ide.natureza_operacao, fonte, 'B', 'L',
+                                               False)
         if self.protocolo and self.data_recebimento:
-            self.caixa_de_texto(self.x + largura_pri_caixa, y_temp, largura_ult_caixa, 6, f'{self.protocolo} - {f_dmah(self.data_recebimento)}', fonte, 'B',
+            self.caixa_de_texto(self.x + largura_pri_caixa, y_temp, largura_ult_caixa, 6,
+                                f'{self.protocolo} - {f_dmah(self.data_recebimento)}', fonte, 'B',
                                 'C', False, forcar=True)
         largura_pri_caixa = round(self.largura_max * 0.33) - self.x
         largura_ult_caixa = self.largura_max - (largura_pri_caixa * 2) - self.x
@@ -220,8 +227,10 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_pri_caixa * 2, posicao_y, largura_ult_caixa, 6, 'CNPJ', fonte)
         fonte.tamanho = 10
         self.caixa_de_texto(self.x, posicao_y, largura_pri_caixa, 6, self.nfe.emitente.inscricao_estadual, fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_pri_caixa, posicao_y, largura_pri_caixa, 6, self.nfe.emitente.inscricao_estadual_st, fonte, 'B', 'R', borda=False)
-        posicao_y += 1 + self.caixa_de_texto(self.x + largura_pri_caixa * 2, posicao_y, largura_ult_caixa, 6, f_cnpj(self.nfe.emitente.cnpj), fonte,
+        self.caixa_de_texto(self.x + largura_pri_caixa, posicao_y, largura_pri_caixa, 6, self.nfe.emitente.inscricao_estadual_st, fonte,
+                            'B', 'R', borda=False)
+        posicao_y += 1 + self.caixa_de_texto(self.x + largura_pri_caixa * 2, posicao_y, largura_ult_caixa, 6,
+                                             f_cnpj(self.nfe.emitente.cnpj), fonte,
                                              'B', 'R', borda=False)
 
         if self.page_no() == 1:
@@ -249,7 +258,8 @@ class DANFeNFe(DFePDF):
             cnpj_cpf = f_cpf(self.nfe.destinatario.cpf)
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.razao_social, fonte, 'B', borda=False, forcar=True)
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6, cnpj_cpf, fonte, 'B', 'R', borda=False)
-        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6, f_dma(self.nfe.ide.data_emissao),
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6,
+                                               f_dma(self.nfe.ide.data_emissao),
                                                fonte, 'B', 'R', borda=False)
         fonte.tamanho = 6
         largura_maior -= largura_menor
@@ -259,12 +269,15 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_maior + largura_media + largura_menor, posicao_y, largura_menor, 6, 'DATA DA SAÍDA', fonte)
         fonte.tamanho = 10
         fonte.estilo = ''
-        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, construir_endereco(self.nfe.destinatario.endereco, com_cidade=False, com_bairro=False), fonte,
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6,
+                            construir_endereco(self.nfe.destinatario.endereco, com_cidade=False, com_bairro=False), fonte,
                             'B', borda=False, forcar=True)
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_media, 6,
-                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False), fonte, 'B', borda=False, forcar=True)
+                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False), fonte, 'B',
+                            borda=False, forcar=True)
         self.caixa_de_texto(self.x + largura_maior + largura_media, posicao_y, largura_menor, 6,
-                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False, com_bairro=False, com_cep=True), fonte,
+                            construir_endereco(self.nfe.destinatario.endereco, com_endereco=False, com_cidade=False, com_bairro=False,
+                                               com_cep=True), fonte,
                             'B', 'R', borda=False)
         posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_media + largura_menor, posicao_y, largura_menor, 6,
                                                f_dma(self.nfe.ide.data_saida_entrada), fonte, 'B', 'R', borda=False)
@@ -275,16 +288,21 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_uf, 6, 'UF', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_uf, posicao_y, largura_menor, 6, 'FONE/FAX', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_menor, posicao_y, largura_media, 6, 'INSCRIÇÃO ESTADUAL', fonte)
-        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y, largura_menor, 6, 'HORA DA SAÍDA', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y, largura_menor, 6,
+                            'HORA DA SAÍDA', fonte)
         fonte.tamanho = 10
         fonte.estilo = ''
-        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.endereco.municipio, fonte, 'B', borda=False, forcar=True)
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, self.nfe.destinatario.endereco.municipio, fonte, 'B', borda=False,
+                            forcar=True)
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_uf, 6, self.nfe.destinatario.endereco.uf, fonte, 'B', borda=False)
-        self.caixa_de_texto(self.x + largura_maior + largura_uf, posicao_y, largura_menor, 6, f_fone(self.nfe.destinatario.endereco.telefone), fonte,
+        self.caixa_de_texto(self.x + largura_maior + largura_uf, posicao_y, largura_menor, 6,
+                            f_fone(self.nfe.destinatario.endereco.telefone), fonte,
                             'B', 'R', borda=False, forcar=True)
-        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_menor, posicao_y, largura_media, 6, self.nfe.destinatario.inscricao_estadual, fonte,
+        self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_menor, posicao_y, largura_media, 6,
+                            self.nfe.destinatario.inscricao_estadual, fonte,
                             'B', 'R', borda=False)
-        posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y, largura_menor, 6,
+        posicao_y = posicao_y + 1 + self.caixa_de_texto(self.x + largura_maior + largura_uf + largura_media + largura_menor, posicao_y,
+                                                        largura_menor, 6,
                                                         f_hora(self.nfe.ide.data_saida_entrada), fonte, 'B', 'R', borda=False)
         return posicao_y
 
@@ -324,12 +342,17 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, 'VALOR ICMS ST', fonte)
         self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6, 'TOTAL DOS PRODUTOS', fonte)
         fonte.tamanho = 10
-        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_base_calculo), fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor), fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_maior * 2, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_base_calculo_st), fonte, 'B', 'R',
+        self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_base_calculo), fonte, 'B', 'R',
                             borda=False)
-        self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_st), fonte, 'B', 'R', borda=False)
-        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6, f_dec_milhar(self.nfe.total.icms.valor_produtos),
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor), fonte, 'B', 'R',
+                            borda=False)
+        self.caixa_de_texto(self.x + largura_maior * 2, posicao_y, largura_maior, 6,
+                            f_dec_milhar(self.nfe.total.icms.valor_base_calculo_st), fonte, 'B', 'R',
+                            borda=False)
+        self.caixa_de_texto(self.x + largura_maior * 3, posicao_y, largura_maior, 6, f_dec_milhar(self.nfe.total.icms.valor_st), fonte, 'B',
+                            'R', borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior * 4, posicao_y, largura_maior_ult, 6,
+                                               f_dec_milhar(self.nfe.total.icms.valor_produtos),
                                                fonte, 'B', 'R', borda=False)
 
         fonte.tamanho = 6
@@ -342,16 +365,23 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_menor * 5, posicao_y, largura_menor, 6, 'VALOR APROX. TRIB.', fonte)
         self.caixa_de_texto(self.x + largura_menor * 6, posicao_y, largura_menor_ult, 6, 'TOTAL DA NOTA', fonte)
         fonte.tamanho = 10
-        self.caixa_de_texto(self.x, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_frete), fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_menor, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_seguro), fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_menor * 2, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_desconto), fonte, 'B', 'R',
+        self.caixa_de_texto(self.x, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_frete), fonte, 'B', 'R',
                             borda=False)
-        self.caixa_de_texto(self.x + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_outros), fonte, 'B', 'R',
+        self.caixa_de_texto(self.x + largura_menor, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_seguro), fonte, 'B',
+                            'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 2, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_desconto),
+                            fonte, 'B', 'R',
                             borda=False)
-        self.caixa_de_texto(self.x + largura_menor * 4, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_ipi), fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_menor * 5, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_total_tributos), fonte, 'B', 'R',
+        self.caixa_de_texto(self.x + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_outros), fonte,
+                            'B', 'R',
                             borda=False)
-        posicao_y += self.caixa_de_texto(self.x + largura_menor * 6, posicao_y, largura_menor_ult, 6, f_dec_milhar(self.nfe.total.icms.valor_nf), fonte, 'B',
+        self.caixa_de_texto(self.x + largura_menor * 4, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_ipi), fonte,
+                            'B', 'R', borda=False)
+        self.caixa_de_texto(self.x + largura_menor * 5, posicao_y, largura_menor, 6, f_dec_milhar(self.nfe.total.icms.valor_total_tributos),
+                            fonte, 'B', 'R',
+                            borda=False)
+        posicao_y += self.caixa_de_texto(self.x + largura_menor * 6, posicao_y, largura_menor_ult, 6,
+                                         f_dec_milhar(self.nfe.total.icms.valor_nf), fonte, 'B',
                                          'R', borda=False)
         return posicao_y
 
@@ -366,7 +396,8 @@ class DANFeNFe(DFePDF):
             return '9-SEM FRETE'
 
         fonte = FontePDF(tamanho=7, estilo='B')
-        posicao_y += 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'TRANSPORTADOR/VOLUMES TRANSPORTADOS', fonte, borda=False)
+        posicao_y += 1 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, 8, 'TRANSPORTADOR/VOLUMES TRANSPORTADOS', fonte,
+                                             borda=False)
         fonte.tamanho = 10
         fonte.estilo = ''
         self.configurar_fonte(fonte)
@@ -403,28 +434,37 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, 'NOME/RAZÃO SOCIAL', fonte)
         self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 6, 'FRETE POR CONTA', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor - largura_uf, 6, 'CÓDIGO ANTT', fonte)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6, 'PLACA DO VEÍC', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6,
+                            'PLACA DO VEÍC', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, 'UF', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, 'CPF/CNPJ', fonte)
         fonte.tamanho = 10
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 6, razao_social, fonte, 'B', borda=False, forcar=True)
-        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 6, get_por_conta(self.nfe.transporte.modalidade_frete), fonte, 'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior, posicao_y, largura_menor, 6, get_por_conta(self.nfe.transporte.modalidade_frete), fonte,
+                            'B', borda=False)
         self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor - largura_uf, 6, rntc, fonte, 'B', borda=False)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6, placa, fonte, 'B', borda=False)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf_placa, fonte, 'B', borda=False)
-        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, cnpj_cpf, fonte, 'B',
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 2 - largura_uf, posicao_y, largura_menor - largura_uf, 6, placa, fonte,
+                            'B', borda=False)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf_placa, fonte, 'B',
+                            borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6,
+                                               cnpj_cpf, fonte, 'B',
                                                borda=False)
         fonte.tamanho = 6
         self.caixa_de_texto(self.x, posicao_y, largura_maior + largura_menor, 6, 'ENDEREÇO', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor * 2 - largura_uf * 2, 6, 'MUNICÍPIO', fonte)
         self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, 'UF', fonte)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, 'INSCRIÇÃO ESTADUAL', fonte)
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, 'INSCRIÇÃO ESTADUAL',
+                            fonte)
         fonte.tamanho = 10
         self.caixa_de_texto(self.x, posicao_y, largura_maior + largura_menor, 6, endereco, fonte, 'B', borda=False, forcar=True)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor * 2 - largura_uf * 2, 6, municipio, fonte, 'B', borda=False,
+        self.caixa_de_texto(self.x + largura_maior + largura_menor, posicao_y, largura_menor * 2 - largura_uf * 2, 6, municipio, fonte, 'B',
+                            borda=False,
                             forcar=True)
-        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf, fonte, 'B', borda=False)
-        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6, inscricao_estadual,
+        self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf * 2, posicao_y, largura_uf, 6, uf, fonte, 'B',
+                            borda=False)
+        posicao_y += 0.5 + self.caixa_de_texto(self.x + largura_maior + largura_menor * 3 - largura_uf, posicao_y, largura_menor_ult, 6,
+                                               inscricao_estadual,
                                                fonte, 'B', borda=False, forcar=True)
         fonte.tamanho = 6
         largura_menor = round(self.largura_max / 6)
@@ -448,9 +488,12 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x, posicao_y, largura_menor_ult, 6, str(quantidade), fonte, 'B', 'R', borda=False)
         self.caixa_de_texto(self.x + largura_menor_ult, posicao_y, largura_menor, 6, especie, fonte, 'B', borda=False)
         self.caixa_de_texto(self.x + largura_menor_ult + largura_menor, posicao_y, largura_menor, 6, marca, fonte, 'B', borda=False)
-        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 2, posicao_y, largura_menor, 6, numero, fonte, 'B', 'R', borda=False)
-        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(peso_liq), fonte, 'B', 'R', borda=False)
-        posicao_y += self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 4, posicao_y, largura_menor, 6, f_dec_milhar(peso_bruto), fonte, 'B', 'R',
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 2, posicao_y, largura_menor, 6, numero, fonte, 'B', 'R',
+                            borda=False)
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(peso_liq), fonte, 'B',
+                            'R', borda=False)
+        posicao_y += self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 4, posicao_y, largura_menor, 6,
+                                         f_dec_milhar(peso_bruto), fonte, 'B', 'R',
                                          borda=False)
         return posicao_y
 
@@ -467,53 +510,77 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x, posicao_y, self.largura_codigo, altura_pagina)
         self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura_pagina)
         self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y, self.largura_cst_un,
+        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm,
                             altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
-                            posicao_y, self.largura_cfop_aliq, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
-                            self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq, posicao_y, self.largura_qt, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura_pagina)
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
-                            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura_pagina)
+        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
+                            self.largura_cst_un,
+                            altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
+            posicao_y, self.largura_cfop_aliq, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
+            self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq, posicao_y, self.largura_qt, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura_pagina)
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
+            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura_pagina)
 
         self.caixa_de_texto(self.x, posicao_y, self.largura_codigo, 6, 'CÓDIGO PRODUTO', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, 6, 'DESCRIÇÃO DO PRODUTO/SERVIÇO', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, 6, 'CÓDIGO DE BARRAS', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm, 6, 'NCM/SH', fonte, 'C',
+        self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, 6, 'DESCRIÇÃO DO PRODUTO/SERVIÇO', fonte, 'C',
                             'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y, self.largura_cst_un,
+        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, 6, 'CÓDIGO DE BARRAS',
+                            fonte, 'C', 'C')
+        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm, 6,
+                            'NCM/SH', fonte, 'C',
+                            'C')
+        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
+                            self.largura_cst_un,
                             6, 'CST', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
-                            posicao_y, self.largura_cfop_aliq, 6, 'CFOP', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
-                            self.largura_cfop_aliq, posicao_y, self.largura_cst_un, 6, 'UNID', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq, posicao_y, self.largura_qt, 6, 'QUANT', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, 6, 'VALOR UNIT', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, 6, 'VALOR TOTAL', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, 6, 'B.CÁLC ICMS', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, 6, 'VALOR ICMS', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, 6, 'ALIQ. ICSM', fonte, 'C', 'C')
-        self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
-                            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, 6, 'V.APRÓX. TRIBUTOS', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
+            posicao_y, self.largura_cfop_aliq, 6, 'CFOP', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
+            self.largura_cfop_aliq, posicao_y, self.largura_cst_un, 6, 'UNID', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq, posicao_y, self.largura_qt, 6, 'QUANT', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, 6, 'VALOR UNIT', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, 6, 'VALOR TOTAL', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, 6, 'B.CÁLC ICMS', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, 6, 'VALOR ICMS', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, 6, 'ALIQ. ICSM', fonte, 'C', 'C')
+        self.caixa_de_texto(
+            self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
+            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, 6, 'V.APRÓX. TRIBUTOS', fonte, 'C', 'C')
         posicao_y += 6
 
         return posicao_y
@@ -534,42 +601,58 @@ class DANFeNFe(DFePDF):
             vbc = f_dec_milhar(icms.valor_base_calculo, 2) if hasattr(icms, 'valor_base_calculo') else '0,00'
             vicms = f_dec_milhar(icms.valor_icms, 2) if hasattr(icms, 'valor_icms') else '0,00'
             aliquota = f_relevante(icms.aliquota) if hasattr(icms, 'aliquota') else '0'
-
+            ipi = f_relevante(
+                detalhe.imposto.ipi.tributacao.aliquota) if detalhe.imposto.ipi.tributacao and detalhe.imposto.ipi.tributacao.aliquota else '0'
             posicao_y = self.y_agora
             descricao = f'{produto.descricao}\n{detalhe.informacoes_adicionais}'
-            altura = 1 + self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura, descricao, fonte, 'T', 'L', borda=False)
+            altura = 1 + self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura, descricao, fonte, 'T',
+                                             'L', borda=False)
             self.caixa_de_texto(self.x, posicao_y, self.largura_codigo, altura, produto.codigo, fonte, 'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, altura, produto.gtin, fonte, 'T', 'R',
+            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao, posicao_y, self.largura_barras, altura, produto.gtin,
+                                fonte, 'T', 'R',
                                 borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm, altura,
+            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras, posicao_y, self.largura_ncm,
+                                altura,
                                 str(produto.ncm), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
                                 self.largura_cst_un, altura, f_cst(icms.cst), fonte, 'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
-                                posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
-                                self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura, produto.unidade, fonte, 'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq, posicao_y, self.largura_qt, altura, f_relevante(produto.quantidade), fonte, 'T', 'R', borda=False,
-                                forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_unitario, 2), fonte,
-                                'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_total, 2), fonte,
-                                'T', 'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, vbc, fonte, 'T', 'R', borda=False,
-                                forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura, vicms, fonte, 'T',
-                                'R', borda=False, forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
-                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, aliquota, fonte, 'T', 'R', borda=False,
-                                forcar=True)
-            self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
-                                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura,
-                                f_dec_milhar(detalhe.imposto.total_tributos, 2), fonte, 'T', 'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
+                posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un +
+                self.largura_cfop_aliq, posicao_y, self.largura_cst_un, altura, produto.unidade, fonte, 'T', 'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq, posicao_y, self.largura_qt, altura, f_relevante(produto.quantidade), fonte, 'T', 'R', borda=False,
+                forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq + self.largura_qt, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_unitario, 2),
+                fonte,
+                'T', 'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq + self.largura_qt * 2, posicao_y, self.largura_qt, altura, f_dec_milhar(produto.valor_total, 2),
+                fonte,
+                'T', 'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq + self.largura_qt * 3, posicao_y, self.largura_qt, altura, vbc, fonte, 'T', 'R', borda=False,
+                forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq + self.largura_qt * 4, posicao_y, self.largura_qt, altura, vicms, fonte, 'T',
+                'R', borda=False, forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 2 +
+                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, altura, aliquota, fonte, 'T', 'R',
+                borda=False,
+                forcar=True)
+            self.caixa_de_texto(
+                self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
+                self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, altura, ipi, fonte, 'T', 'R', borda=False,
+                forcar=True)
             self.line(self.x, posicao_y + altura, self.largura_max, posicao_y + altura)
             self.y_agora += altura
 
@@ -602,7 +685,8 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x, posicao_y, largura_maior, 25, texto, fonte, borda=False)
         posicao_y += 22
         self.caixa_de_texto(self.x, posicao_y, self.largura_max, 6, f'IMPRESSO EM: {f_dmah(datetime.now())}', fonte, borda=False)
-        self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, 6, f'SIGe | Desenvolvimento: TI - Casa Norte LTDA', fonte, borda=False,
+        self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, 6, f'SIGe | Desenvolvimento: TI - Casa Norte LTDA', fonte,
+                            borda=False,
                             alinhamento_h='R')
 
 
@@ -621,11 +705,14 @@ class DANFeNFCe(DFePDF):
         altura = 4
         posicao_y = self.y
         posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, f'CNPJ: {f_cnpj(self.nfe.emitente.cnpj)} '
-                                                                                               f'{self.nfe.emitente.razao_social}', fonte, 'B', 'C', False)
-        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, f'{self.nfe.emitente.fantasia}', fonte, 'B', 'C', False)
+                                                                                               f'{self.nfe.emitente.razao_social}', fonte,
+                                         'B', 'C', False)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, f'{self.nfe.emitente.fantasia}', fonte, 'B',
+                                         'C', False)
         posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura,
                                          f'{construir_endereco(self.nfe.emitente.endereco, com_cep=True)}', fonte, 'B', 'C', False)
-        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura, 'Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica',
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max - self.x, altura,
+                                         'Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica',
                                          fonte, 'B', 'C', False)
         fonte.tamanho = 8
         fonte.estilo = 'B'
@@ -638,9 +725,12 @@ class DANFeNFCe(DFePDF):
         self.caixa_de_texto(self.x + largura_vtotal, posicao_y, largura_maior, altura, 'DESCRICAO', fonte, 'B', 'L', False)
         self.caixa_de_texto(self.x + largura_vtotal + largura_maior, posicao_y, largura_vtotal, altura, 'QTDE', fonte, 'B', 'R', False)
         self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior, posicao_y, largura_un, altura, 'UN', fonte, 'B', 'R', False)
-        self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.UNIT', fonte, 'B', 'R', False)
-        self.caixa_de_texto(self.x + largura_vtotal * 3 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.TOTAL', fonte, 'B', 'R', False)
-        posicao_y += self.caixa_de_texto(self.x + largura_vtotal * 4 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'TRIB', fonte, 'B', 'R',
+        self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.UNIT', fonte,
+                            'B', 'R', False)
+        self.caixa_de_texto(self.x + largura_vtotal * 3 + largura_maior + largura_un, posicao_y, largura_vtotal, altura, 'V.TOTAL', fonte,
+                            'B', 'R', False)
+        posicao_y += self.caixa_de_texto(self.x + largura_vtotal * 4 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
+                                         'TRIB', fonte, 'B', 'R',
                                          False)
         qt_total = Decimal()
         fonte.estilo = ''
@@ -650,9 +740,11 @@ class DANFeNFCe(DFePDF):
             qt_total += produto.quantidade
             self.caixa_de_texto(self.x, posicao_y, largura_vtotal, altura, produto.codigo, fonte, 'B', 'R', False)
             self.caixa_de_texto(self.x + largura_vtotal, posicao_y, largura_maior, altura, produto.descricao, fonte, 'B', 'L', False)
-            self.caixa_de_texto(self.x + largura_vtotal + largura_maior, posicao_y, largura_vtotal, altura, f_relevante(produto.quantidade), fonte, 'B', 'R',
+            self.caixa_de_texto(self.x + largura_vtotal + largura_maior, posicao_y, largura_vtotal, altura, f_relevante(produto.quantidade),
+                                fonte, 'B', 'R',
                                 False)
-            self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior, posicao_y, largura_un, altura, produto.unidade, fonte, 'B', 'R', False)
+            self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior, posicao_y, largura_un, altura, produto.unidade, fonte, 'B',
+                                'R', False)
             self.caixa_de_texto(self.x + largura_vtotal * 2 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
                                 f_dec_milhar(produto.valor_unitario, 2), fonte, 'B', 'R', False)
             self.caixa_de_texto(self.x + largura_vtotal * 3 + largura_maior + largura_un, posicao_y, largura_vtotal, altura,
@@ -662,14 +754,17 @@ class DANFeNFCe(DFePDF):
         posicao_y = self.verifica_se_cabe(posicao_y)
         fonte.estilo = 'B'
         self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'QDE. TOTAL DE ITENS', fonte, 'B', 'L', False)
-        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_relevante(qt_total), fonte, 'B', 'R', False)
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_relevante(qt_total), fonte, 'B',
+                                         'R', False)
         posicao_y = self.verifica_se_cabe(posicao_y)
         self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'VALOR TOTAL R$', fonte, 'B', 'L', False)
-        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_moeda(self.nfe.total.icms.valor_produtos), fonte, 'B',
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura,
+                                         f_moeda(self.nfe.total.icms.valor_produtos), fonte, 'B',
                                          'R', False)
         posicao_y = self.verifica_se_cabe(posicao_y + altura / 2)
         self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, 'FORMA PAGAMENTO', fonte, 'B', 'L', False)
-        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, 'VALOR PAGO R$', fonte, 'B', 'R', False)
+        posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, 'VALOR PAGO R$', fonte, 'B', 'R',
+                                         False)
         for pagamento in self.nfe.pagamentos:
             posicao_y = self.verifica_se_cabe(posicao_y)
             if pagamento.cartao:
@@ -677,17 +772,21 @@ class DANFeNFCe(DFePDF):
             else:
                 descricao = pagamento.descricao_pagamento()
             self.caixa_de_texto(self.x, posicao_y, self.largura_max / 2, altura, descricao, fonte, 'B', 'L', False)
-            posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_moeda(pagamento.valor), fonte, 'B', 'R', False)
+            posicao_y += self.caixa_de_texto(self.largura_max / 2, posicao_y, self.largura_max / 2, altura, f_moeda(pagamento.valor), fonte,
+                                             'B', 'R', False)
         url = parse_url(self.dado_qrcode)
         posicao_y = self.verifica_se_cabe(posicao_y)
         fonte.tamanho = 10
-        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, 'Consulte pela Chave de Acesso em', fonte, 'B', 'C', False)
+        posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, 'Consulte pela Chave de Acesso em', fonte, 'B', 'C',
+                                         False)
         fonte.estilo = ''
         posicao_y = self.verifica_se_cabe(posicao_y)
         posicao_y += self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura,
-                                         f'{url.scheme}://{url.host}{(":" + str(url.port)) if url.port else ""}{url.path}', fonte, 'B', 'C', False)
+                                         f'{url.scheme}://{url.host}{(":" + str(url.port)) if url.port else ""}{url.path}', fonte, 'B', 'C',
+                                         False)
         posicao_y = self.verifica_se_cabe(posicao_y)
-        posicao_y += 5 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura, f_espaco_a_cada(self.nfe.id.replace('NFe', ''), 4), fonte, 'B', 'C',
+        posicao_y += 5 + self.caixa_de_texto(self.x, posicao_y, self.largura_max, altura,
+                                             f_espaco_a_cada(self.nfe.id.replace('NFe', ''), 4), fonte, 'B', 'C',
                                              False)
         qr = qrcode.QRCode(border=0)
         qr.add_data(self.dado_qrcode)
@@ -706,12 +805,15 @@ class DANFeNFCe(DFePDF):
             linha_cliente = 'NÃO IDENTIFICADO'
         linha_nfce = f'NFC-e Nº {f_int_milhar(self.nfe.ide.nf)}    Série: {self.nfe.ide.serie}    {f_dmah(self.nfe.ide.data_emissao)}'
         fonte.estilo = 'B'
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'CONSUMIDOR {linha_cliente}', fonte, 'B', 'L', False)
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'CONSUMIDOR {linha_cliente}', fonte,
+                                         'B', 'L', False)
         posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, linha_nfce, fonte, 'B', 'L', False)
         fonte.estilo = ''
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'Protocolo de autorização: {self.protocolo}', fonte, 'B',
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura,
+                                         f'Protocolo de autorização: {self.protocolo}', fonte, 'B',
                                          'L', False)
-        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura, f'Data de autorização: {f_dmah(self.data_recebimento)}',
+        posicao_y += self.caixa_de_texto(posicao_x, posicao_y, self.largura_max - posicao_x, altura,
+                                         f'Data de autorização: {f_dmah(self.data_recebimento)}',
                                          fonte, 'B', 'L', False)
         if self.verifica_se_cabe(posicao_y_pulo + altura) == self.y:
             posicao_y = self.y
