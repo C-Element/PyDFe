@@ -580,7 +580,7 @@ class DANFeNFe(DFePDF):
             self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_cst_un, 6, 'ALIQ. ICSM', fonte, 'C', 'C')
         self.caixa_de_texto(
             self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un * 3 +
-            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, 6, 'V.APRÓX. TRIBUTOS', fonte, 'C', 'C')
+            self.largura_cfop_aliq + self.largura_qt * 5, posicao_y, self.largura_tributos, 6, '% IPI', fonte, 'C', 'C')
         posicao_y += 6
 
         return posicao_y
