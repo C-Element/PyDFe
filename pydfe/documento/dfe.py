@@ -38,7 +38,7 @@ class Cartao(BaseObjDFe):  # [#YA04]
             elif chave == 'tBand':
                 self.bandeira = ler_texto(valor)
             elif chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
 
     def descricao_bandeira(self):
         descricao = 'Outros'
@@ -107,7 +107,7 @@ class COFINSAliquota(BaseObjDFe):  # {#S02}
             if chave == 'pCOFINS':
                 self.aliquota = Decimal(valor)
             elif chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'vCOFINS':
                 self.valor = Decimal(valor)
             elif chave == 'vBC':
@@ -124,7 +124,7 @@ class COFINSNaoTributado(BaseObjDFe):  # {#S04}
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
 
 
 class COFINSOutros(COFINSAliquota):  # {#S05}
@@ -151,7 +151,7 @@ class COFINSOutros(COFINSAliquota):  # {#S05}
         super()._preencher()
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'qBCProd':
                 self.quantidade_base_calculo = Decimal(valor)
             if chave == 'vAliqProd':
@@ -169,7 +169,7 @@ class COFINSQuantidade(BaseObjDFe):  # {#S03}
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'qBCProd':
                 self.quantidade_base_calculo = Decimal(valor)
             elif chave == 'vAliqProd':
@@ -195,11 +195,11 @@ class ConhecimentoTransporte(BaseObjDFe):
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'chCTe':
-                self.chave = int(valor)
+                self.chave = ler_inteiro(valor)
             elif chave == 'indReentrega':
-                self.indicador_reentrega = int(valor)
+                self.indicador_reentrega = ler_inteiro(valor)
             elif chave == 'SegCodBarra':
-                self.segundo_codigo_barras = int(valor)
+                self.segundo_codigo_barras = ler_inteiro(valor)
             elif chave == 'infUnidTransp':
                 if isinstance(valor, list):
                     for unidade in valor:
@@ -231,9 +231,9 @@ class Destinatario(BaseObjDFe):  # [#E01]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
             elif chave == 'CPF':
-                self.cpf = int(valor)
+                self.cpf = ler_inteiro(valor)
             elif chave == 'email':
                 self.email = ler_texto(valor)
             elif chave == 'idEstrangeiro':
@@ -241,7 +241,7 @@ class Destinatario(BaseObjDFe):  # [#E01]
             elif chave == 'IM':
                 self.inscricao_municipal_tomador_servico = ler_texto(valor)
             elif chave == 'indIEDest':
-                self.indicador_inscricao_estadual = int(valor)
+                self.indicador_inscricao_estadual = ler_inteiro(valor)
             elif chave == 'IE':
                 self.inscricao_estadual = ler_texto(valor)
             elif chave == 'ISUF':
@@ -269,7 +269,7 @@ class Detalhamento(BaseObjDFe):  # [#H01]
             elif chave == 'infAdProd':
                 self.informacoes_adicionais = ler_texto(valor)
             elif chave == '@nItem':
-                self.numero_item = int(valor)
+                self.numero_item = ler_inteiro(valor)
             elif chave == 'prod':
                 self.produto = Produto(valor)
             elif chave == 'importDevol':
@@ -281,7 +281,8 @@ class DocumentoReferenciado(BaseObjDFe):  # [#BA01]
     def __init__(self, dado: OrderedDict):
         self.chave_nfe_ref: List[int] = []  # Chave de acesso da NF-e referenciada :: <refNFe> [#BA02]
         self.informacao_nf_ref: List[NFeReferenciada] = []  # Informação da NF modelo 1/1A referenciada :: <refNF> [#BA03]
-        self.informacao_nfe_pr_ref: List[NFeReferenciadaProdutoRural] = []  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
+        self.informacao_nfe_pr_ref: List[
+            NFeReferenciadaProdutoRural] = []  # Informações da NF de produtor rural referenciada :: <refNFP> [#BA10]
         self.informacao_ecf_ref: List[ECFReferenciado] = []  # Informações do Cupom Fiscal referenciado :: <refECF> [#BA20]
         self.chave_cte_ref: List[int] = []  # Informações do CTe referenciado :: <refCTe> [#BA19]
         super().__init__(dado)
@@ -291,10 +292,10 @@ class DocumentoReferenciado(BaseObjDFe):  # [#BA01]
             if chave == 'refNFe':
                 if isinstance(valor, list):
                     for doc in valor:
-                        documento = int(doc)
+                        documento = ler_inteiro(doc)
                         self.chave_nfe_ref.append(documento)
                 else:
-                    documento = int(valor)
+                    documento = ler_inteiro(valor)
                     self.chave_nfe_ref.append(documento)
             elif chave == 'refNF':
                 if isinstance(valor, list):
@@ -323,10 +324,10 @@ class DocumentoReferenciado(BaseObjDFe):  # [#BA01]
             elif chave == 'refCTe':
                 if isinstance(valor, list):
                     for doc in valor:
-                        documento = int(doc)
+                        documento = ler_inteiro(doc)
                         self.chave_cte_ref.append(documento)
                 else:
-                    documento = int(valor)
+                    documento = ler_inteiro(valor)
                     self.chave_cte_ref.append(documento)
 
 
@@ -359,11 +360,11 @@ class ECFReferenciado(BaseObjDFe):  # [#BA20]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'mod':
-                self.modelo = int(valor)
+                self.modelo = ler_inteiro(valor)
             elif chave == 'nCOO':
-                self.numero_coo = int(valor)
+                self.numero_coo = ler_inteiro(valor)
             elif chave == 'nECF':
-                self.numero_ecf = int(valor)
+                self.numero_ecf = ler_inteiro(valor)
 
 
 class Emitente(BaseObjDFe):  # [#C01]
@@ -381,9 +382,9 @@ class Emitente(BaseObjDFe):  # [#C01]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
             elif chave == 'CPF':
-                self.cpf = int(valor)
+                self.cpf = ler_inteiro(valor)
             elif chave == 'enderEmit':
                 self.endereco = Endereco(valor)
             elif chave == 'xFant':
@@ -418,11 +419,11 @@ class Endereco(BaseObjDFe):  # [#C05]
             if chave == 'xBairro':
                 self.bairro = ler_texto(valor)
             elif chave == 'CEP':
-                self.cep = int(valor)
+                self.cep = ler_inteiro(valor)
             elif chave == 'cMun':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'cPais':
-                self.codigo_pais = int(valor)
+                self.codigo_pais = ler_inteiro(valor)
             elif chave == 'xCpl':
                 self.complemento = ler_texto(valor)
             elif chave == 'email':
@@ -436,7 +437,7 @@ class Endereco(BaseObjDFe):  # [#C05]
             elif chave == 'xPais':
                 self.pais = ler_texto(valor)
             elif chave == 'fone':
-                self.telefone = int(valor)
+                self.telefone = ler_inteiro(valor)
             elif chave == 'UF':
                 self.uf = ler_texto(valor)
 
@@ -460,11 +461,11 @@ class EntregaRetirada(BaseObjDFe):  # [#F01]
             if chave == 'xBairro':
                 self.bairro = ler_texto(valor)
             elif chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
             elif chave == 'CPF':
-                self.cpf = int(valor)
+                self.cpf = ler_inteiro(valor)
             elif chave == 'cMun':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'xCpl':
                 self.complemento = ler_texto(valor)
             elif chave == 'xLgr':
@@ -565,9 +566,9 @@ class ICMS00(BaseObjDFe):  # [#N02]
             if chave == 'pICMS':
                 self.aliquota = Decimal(valor)
             elif chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'orig':
-                self.origem = int(valor)
+                self.origem = ler_inteiro(valor)
             elif chave == 'vBC':
                 self.valor_base_calculo = Decimal(valor)
             elif chave == 'vICMS':
@@ -593,7 +594,7 @@ class ICMS10(ICMS00):  # [#N03]
             if chave == 'pICMSST':
                 self.aliquota_st = Decimal(valor)
             elif chave == 'modBCST':
-                self.modalidade_base_calculo_st = int(valor)
+                self.modalidade_base_calculo_st = ler_inteiro(valor)
             elif chave == 'pMVAST':
                 self.mva_st = Decimal(valor)
             elif chave == 'pRedBCST':
@@ -653,11 +654,11 @@ class ICMS30(BaseObjDFe):  # [#N05]
             if chave == 'pICMSST':
                 self.aliquota_st = Decimal(valor)
             elif chave == 'orig':
-                self.origem = int(valor)
+                self.origem = ler_inteiro(valor)
             elif chave == 'modBCST':
-                self.modalidade_base_calculo_st = int(valor)
+                self.modalidade_base_calculo_st = ler_inteiro(valor)
             elif chave == 'motDesICMS':
-                self.motivo_icms_desonerado = int(valor)
+                self.motivo_icms_desonerado = ler_inteiro(valor)
             elif chave == 'pMVAST':
                 self.mva_st = Decimal(valor)
             elif chave == 'pRedBCST':
@@ -690,11 +691,11 @@ class ICMS4050(BaseObjDFe):  # [#N06]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'orig':
-                self.origem = int(valor)
+                self.origem = ler_inteiro(valor)
             elif chave == 'motDesICMS':
-                self.motivo_icms_desonerado = int(valor)
+                self.motivo_icms_desonerado = ler_inteiro(valor)
             elif chave == 'vICMSDeson':
                 self.valor_icms_desonerado = Decimal(valor)
 
@@ -741,9 +742,9 @@ class ICMS60(BaseObjDFe):  # [#N08]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'orig':
-                self.origem = int(valor)
+                self.origem = ler_inteiro(valor)
             elif chave == 'vBCICMSRet':
                 self.valor_base_calculo_retido = Decimal(valor)
             elif chave == 'vICMSRet':
@@ -773,7 +774,7 @@ class ICMS7090(ICMS10):  # [#N09] [#N10]
 
 class ICMSPartilha(ICMS7090):  # [#N10a]
     def __init__(self, dado: OrderedDict):
-        self.cst: int = int()  # :: <CST> [#N12]
+        self.cst: int = ler_inteiro()  # :: <CST> [#N12]
         self.percentual_operacao_propria: Decimal = Decimal()  # :: <pBCOp> [#N25]
         self.uf_st: str = str()  # :: <UFST> [#24]
         super().__init__(dado)
@@ -852,9 +853,9 @@ class IDe(BaseObjDFe):  # [#B01]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'cNF':
-                self.cnf = int(valor)
+                self.cnf = ler_inteiro(valor)
             elif chave == 'cMDF':
-                self.cmdf = int(valor)
+                self.cmdf = ler_inteiro(valor)
             elif chave == 'dhEmi':
                 self.data_emissao = ler_data_hora(valor)
             elif chave == 'dEmi':
@@ -870,17 +871,17 @@ class IDe(BaseObjDFe):  # [#B01]
                     documento = DocumentoReferenciado(valor)
                     self.documentos_referenciados.append(documento)
             elif chave == 'cDV':
-                self.dv = int(valor)
+                self.dv = ler_inteiro(valor)
             elif chave == 'finNFe':
-                self.finalidade = int(valor)
+                self.finalidade = ler_inteiro(valor)
             elif chave == 'idDest':
-                self.id_destino = int(valor)
+                self.id_destino = ler_inteiro(valor)
             elif chave == 'indFinal':
-                self.indicador_consumidor_final = int(valor)
+                self.indicador_consumidor_final = ler_inteiro(valor)
             elif chave == 'indPag':
-                self.indicador_pagamento = int(valor)
+                self.indicador_pagamento = ler_inteiro(valor)
             elif chave == 'indPres':
-                self.indicador_presenca = int(valor)
+                self.indicador_presenca = ler_inteiro(valor)
             elif chave == 'infMunCarrega':
                 if isinstance(valor, list):
                     for municipio_carregamento in valor:
@@ -888,17 +889,17 @@ class IDe(BaseObjDFe):  # [#B01]
                 else:
                     self.municipios_carregamentos.append(MunicipioCarregamento(valor))
             elif chave == 'mod':
-                self.modelo = int(valor)
+                self.modelo = ler_inteiro(valor)
             elif chave == 'modal':
-                self.modalidade = int(valor)
+                self.modalidade = ler_inteiro(valor)
             elif chave == 'cMunFG':
-                self.municipio = int(valor)
+                self.municipio = ler_inteiro(valor)
             elif chave == 'natOp':
                 self.natureza_operacao = ler_texto(valor)
             elif chave == 'nNF':
-                self.nf = int(valor)
+                self.nf = ler_inteiro(valor)
             elif chave == 'nMDF':
-                self.mdf = int(valor)
+                self.mdf = ler_inteiro(valor)
             elif chave == 'infPercurso':
                 if isinstance(valor, list):
                     for percurso in valor:
@@ -906,21 +907,21 @@ class IDe(BaseObjDFe):  # [#B01]
                 else:
                     self.percurso_mdfe.append(PercusrsoMDFe(valor))
             elif chave == 'procEmi':
-                self.processo_emissao = int(valor)
+                self.processo_emissao = ler_inteiro(valor)
             elif chave == 'serie':
-                self.serie = int(valor)
+                self.serie = ler_inteiro(valor)
             elif chave == 'tpAmb':
-                self.tipo_ambiente = int(valor)
+                self.tipo_ambiente = ler_inteiro(valor)
             elif chave == 'tpEmis':
-                self.tipo_emissao = int(valor)
+                self.tipo_emissao = ler_inteiro(valor)
             elif chave == 'tpEmit':
-                self.tipo_emitente = int(valor)
+                self.tipo_emitente = ler_inteiro(valor)
             elif chave == 'tpImp':
-                self.tipo_impressao = int(valor)
+                self.tipo_impressao = ler_inteiro(valor)
             elif chave == 'tpTransp':
-                self.tipo_transportador = int(valor)
+                self.tipo_transportador = ler_inteiro(valor)
             elif chave == 'tpNF':
-                self.tipo_nf = int(valor)
+                self.tipo_nf = ler_inteiro(valor)
             elif chave == 'cUF':
                 self.uf = ler_texto(valor)
             elif chave == 'UFIni':
@@ -1045,9 +1046,9 @@ class InfEvento(BaseObjDFe):
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'chNFe':
-                self.chave_nfe = int(valor)
+                self.chave_nfe = ler_inteiro(valor)
             elif chave == 'CNPJ' or chave == 'CPF':
-                self.cnpj_cpf = int(valor)
+                self.cnpj_cpf = ler_inteiro(valor)
             elif chave == '@Id':
                 self.id = ler_texto(valor)
             elif chave == 'dhEvento':
@@ -1149,7 +1150,7 @@ class IPI(BaseObjDFe):  # [# O01]
             if chave == 'clEnq':
                 self.class_de_enquadramento = ler_texto(valor)
             elif chave == 'CNPJProd':
-                self.cnpj_produtor = int(valor)
+                self.cnpj_produtor = ler_inteiro(valor)
             elif chave == 'cEnq':
                 self.codigo_enquadramento = ler_texto(valor)
             elif chave == 'cSelo':
@@ -1157,7 +1158,7 @@ class IPI(BaseObjDFe):  # [# O01]
             elif chave == 'IPINT':
                 self.nao_tributado = IPINaoTributado(valor)
             elif chave == 'qSelo':
-                self.quantidade_selo = int(valor)
+                self.quantidade_selo = ler_inteiro(valor)
             elif chave == 'IPITrib':
                 self.tributacao = IPITributacao(valor)
 
@@ -1171,7 +1172,7 @@ class IPINaoTributado(BaseObjDFe):  # [#O08]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
 
 
 class IPITributacao(BaseObjDFe):  # [#O07]
@@ -1190,7 +1191,7 @@ class IPITributacao(BaseObjDFe):  # [#O07]
             if chave == 'pIPI':
                 self.aliquota = Decimal(valor)
             elif chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'qUnid':
                 self.quantidade_unidade = Decimal(valor)
             elif chave == 'vBC':
@@ -1228,17 +1229,17 @@ class ISSQN(BaseObjDFe):  # [#U01]
             if chave == 'vAliq':
                 self.aliquota = Decimal(valor)
             elif chave == 'cMunFG':
-                self.codigo_municipio_fato_gerador = int(valor)
+                self.codigo_municipio_fato_gerador = ler_inteiro(valor)
             elif chave == 'cMun':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'cPais':
-                self.codigo_pais = int(valor)
+                self.codigo_pais = ler_inteiro(valor)
             elif chave == 'cServico':
                 self.codigo_servico = ler_texto(valor)
             elif chave == 'indIncentivo':
-                self.indicador_incentivo_fiscal = int(valor)
+                self.indicador_incentivo_fiscal = ler_inteiro(valor)
             elif chave == 'indISS':
-                self.indicador_iss = int(valor)
+                self.indicador_iss = ler_inteiro(valor)
             elif chave == 'cListServ':
                 self.item_lista_servico = ler_texto(valor)
             elif chave == 'nProcesso':
@@ -1273,18 +1274,18 @@ class NFeReferenciada(BaseObjDFe):  # [#BA03]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
             elif chave == 'AAMM':
                 try:
                     self.emissao = ler_data(valor, formato_data_ano_mes)
                 except:
                     self.emissao = ler_data(valor, '%y%m')
             elif chave == 'mod':
-                self.modelo = int(valor)
+                self.modelo = ler_inteiro(valor)
             elif chave == 'nNF':
-                self.nf = int(valor)
+                self.nf = ler_inteiro(valor)
             elif chave == 'serie':
-                self.serie = int(valor)
+                self.serie = ler_inteiro(valor)
             elif chave == 'cUF':
                 self.uf = ler_texto(valor)
 
@@ -1298,7 +1299,7 @@ class MunicipioCarregamento(BaseObjDFe):
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'cMunCarrega':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'xMunCarrega':
                 self.municipio = ler_texto(valor)
 
@@ -1313,7 +1314,7 @@ class MunicipioDescarregamento(BaseObjDFe):
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'cMunDescarga':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'xMunDescarga':
                 self.municipio = ler_texto(valor)
             elif chave == 'infCTe':
@@ -1336,9 +1337,9 @@ class NFeReferenciadaProdutoRural(NFeReferenciada):  # [#BA10]
         super()._preencher()
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CPF':
-                self.cpf = int(valor)
+                self.cpf = ler_inteiro(valor)
             elif chave == 'refCTe':
-                self.cte_referenciada = int(valor)
+                self.cte_referenciada = ler_inteiro(valor)
             elif chave == 'IE':
                 self.inscricao_estadual = ler_texto(valor)
 
@@ -1452,7 +1453,7 @@ class PISAliquota(BaseObjDFe):  # {#Q02}
             if chave == 'pPIS':
                 self.aliquota = Decimal(valor)
             elif chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'vBC':
                 self.valor_base_calculo = Decimal(valor)
             elif chave == 'vPIS':
@@ -1469,7 +1470,7 @@ class PISNaoTributado(BaseObjDFe):  # {#Q04}
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
 
 
 class PISOutros(PISAliquota):  # {#Q05}
@@ -1497,7 +1498,7 @@ class PISOutros(PISAliquota):  # {#Q05}
         super()._preencher()
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'qBCProd':
                 self.quantidade_base_calculo = Decimal(valor)
             elif chave == 'vAliqProd':
@@ -1516,7 +1517,7 @@ class PISQuantidade(BaseObjDFe):  # {#Q03}
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CST':
-                self.cst = int(valor)
+                self.cst = ler_inteiro(valor)
             elif chave == 'qBCProd':
                 self.quantidade_base_calculo = Decimal(valor)
             elif chave == 'vAliqProd':
@@ -1566,13 +1567,13 @@ class Produto(BaseObjDFe):  # [#I01]
             if chave == 'cProd':
                 self.codigo = ler_texto(valor)
             elif chave == 'CFOP':
-                self.cfop = int(valor)
+                self.cfop = ler_inteiro(valor)
             elif chave == 'vDesc':
                 self.desconto = Decimal(valor)
             elif chave == 'xProd':
                 self.descricao = ler_texto(valor)
             elif chave == 'EXTIPI':
-                self.ex_tipi = int(valor)
+                self.ex_tipi = ler_inteiro(valor)
             elif chave == 'vFrete':
                 self.valor_frete = Decimal(valor)
             elif chave == 'cEAN':
@@ -1580,9 +1581,9 @@ class Produto(BaseObjDFe):  # [#I01]
             elif chave == 'cEANTrib':
                 self.gtin_tribut = ler_texto(valor)
             elif chave == 'indTot':
-                self.indicador_total = int(valor)
+                self.indicador_total = ler_inteiro(valor)
             elif chave == 'NCM':
-                self.ncm = int(valor)
+                self.ncm = ler_inteiro(valor)
             elif chave == 'NVE':
                 self.nve = ler_texto(valor)
             elif chave == 'vOutro':
@@ -1621,9 +1622,9 @@ class RetencaoTransporte(BaseObjDFe):  # [#X11]
             if chave == 'pICMSRet':
                 self.aliquota = Decimal(valor)
             elif chave == 'CFOP':
-                self.cfop = int(valor)
+                self.cfop = ler_inteiro(valor)
             elif chave == 'cMunFG':
-                self.codigo_municipio = int(valor)
+                self.codigo_municipio = ler_inteiro(valor)
             elif chave == 'vBCRet':
                 self.valor_base_calculo = Decimal(valor)
             elif chave == 'vICMSRet':
@@ -1728,7 +1729,7 @@ class TotalISSQN(BaseObjDFe):  # :: <ISSQNtot> [#W17]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'cRegTrib':
-                self.codigo_regime_tributacao = int(valor)
+                self.codigo_regime_tributacao = ler_inteiro(valor)
             elif chave == 'dCompet':
                 self.data_competencia = ler_data(valor)
             elif chave == 'vISS':
@@ -1799,9 +1800,9 @@ class Transportador(BaseObjDFe):  # [#X03]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'CNPJ':
-                self.cnpj = int(valor)
+                self.cnpj = ler_inteiro(valor)
             elif chave == 'cpf':
-                self.cpf = int(valor)
+                self.cpf = ler_inteiro(valor)
             elif chave == 'xEnder':
                 self.endereco = ler_texto(valor)
             elif chave == 'IE':
@@ -1834,7 +1835,7 @@ class Transporte(BaseObjDFe):  # [#X01]
             if chave == 'balsa':
                 self.balsa = ler_texto(valor)
             elif chave == 'modFrete':
-                self.modalidade_frete = int(valor)
+                self.modalidade_frete = ler_inteiro(valor)
             elif chave == 'reboque':
                 if isinstance(valor, list):
                     for reboque in valor:
@@ -1911,7 +1912,7 @@ class TransporteVolume(BaseObjDFe):  # :: <vol> [#X26]
             elif chave == 'pesoL':
                 self.peso_liquido = Decimal(valor)
             elif chave == 'qVol':
-                self.quantidade = int(valor)
+                self.quantidade = ler_inteiro(valor)
 
 
 class TributoDevolvido(BaseObjDFe):  # [#UA01]
@@ -1962,7 +1963,7 @@ class UnidadeTransporte(BaseObjDFe):
                 else:
                     self.lacres.append(VolumeLacre(valor))
             elif chave == 'tpUnidTransp':
-                self.tipo_unidade = int(valor)
+                self.tipo_unidade = ler_inteiro(valor)
             elif chave == 'infUnidCarga':
                 if isinstance(valor, list):
                     for unidade in valor:
@@ -1993,7 +1994,7 @@ class UnidadeCarga(BaseObjDFe):
                 else:
                     self.lacres.append(VolumeLacre(valor))
             elif chave == 'tpUnidCarga':
-                self.tipo_unidade = int(valor)
+                self.tipo_unidade = ler_inteiro(valor)
             elif chave == 'qtdRat':
                 self.quantidade_rateio = Decimal(valor)
 
@@ -2047,3 +2048,15 @@ def ler_texto(texto: str) -> str:
     if texto is None:
         return str()
     return texto
+
+
+def ler_inteiro(texto: str) -> int:
+    if texto is None:
+        return 0
+    return int(texto)
+
+
+def ler_decimal(texto: str) -> Decimal:
+    if texto is None:
+        return Decimal()
+    return Decimal(texto)
