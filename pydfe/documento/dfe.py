@@ -17,6 +17,8 @@ class DocumentoInvalido(Exception):
 class BaseObjDFe(object):
     def __init__(self, dado: OrderedDict):
         self._conteudo_xml: OrderedDict = dado
+        if dado is None:
+            return
         self._preencher()
 
     def _preencher(self) -> None:
@@ -1643,11 +1645,11 @@ class Total(BaseObjDFe):  # [#W01]
 
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
-            if chave == 'ICMSTot':
+            if chave == 'ICMSTot' and valor is not None:
                 self.icms = TotalICMS(valor)
-            elif chave == 'ISSQNTot':
+            elif chave == 'ISSQNTot' and valor is not None:
                 self.icms = TotalISSQN(valor)
-            elif chave == 'retTrib':
+            elif chave == 'retTrib' and valor is not None:
                 self.icms = TotalRetencao(valor)
 
 
