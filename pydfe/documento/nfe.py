@@ -615,7 +615,7 @@ class DANFeNFe(DFePDF):
                                 altura,
                                 str(produto.ncm), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
-                                self.largura_cst_un, altura, f_cst(icms.cst), fonte, 'T', 'R', borda=False, forcar=True)
+                                self.largura_cst_un, altura, f_cst((icms.origem * 100) + icms.cst), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(
                 self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
                 posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False, forcar=True)
