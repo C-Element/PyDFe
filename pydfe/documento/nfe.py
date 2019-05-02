@@ -601,8 +601,11 @@ class DANFeNFe(DFePDF):
             vbc = f_dec_milhar(icms.valor_base_calculo, 2) if hasattr(icms, 'valor_base_calculo') else '0,00'
             vicms = f_dec_milhar(icms.valor_icms, 2) if hasattr(icms, 'valor_icms') else '0,00'
             aliquota = f_relevante(icms.aliquota) if hasattr(icms, 'aliquota') else '0'
-            ipi = f_relevante(
-                detalhe.imposto.ipi.tributacao.aliquota) if detalhe.imposto.ipi.tributacao and detalhe.imposto.ipi.tributacao.aliquota else '0'
+            if (detalhe.imposto.ipi and detalhe.imposto.ipi.tributacao
+                    and detalhe.imposto.ipi.tributacao.aliquota):
+                ipi = f_relevante(detalhe.imposto.ipi.tributacao.aliquota)
+            else:
+                ipi ='0'
             posicao_y = self.y_agora
             descricao = f'{produto.descricao}\n{detalhe.informacoes_adicionais}'
             altura = 1 + self.caixa_de_texto(self.x + self.largura_codigo, posicao_y, self.largura_descricao, altura, descricao, fonte, 'T',
