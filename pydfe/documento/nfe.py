@@ -601,6 +601,8 @@ class DANFeNFe(DFePDF):
             vbc = f_dec_milhar(icms.valor_base_calculo, 2) if hasattr(icms, 'valor_base_calculo') else '0,00'
             vicms = f_dec_milhar(icms.valor_icms, 2) if hasattr(icms, 'valor_icms') else '0,00'
             aliquota = f_relevante(icms.aliquota) if hasattr(icms, 'aliquota') else '0'
+            origem = icms.origem if hasattr(icms, 'origem') else 0
+            cst = icms.cst if hasattr(icms, 'cst') else 0
             if (detalhe.imposto.ipi and detalhe.imposto.ipi.tributacao
                     and detalhe.imposto.ipi.tributacao.aliquota):
                 ipi = f_relevante(detalhe.imposto.ipi.tributacao.aliquota)
@@ -618,7 +620,7 @@ class DANFeNFe(DFePDF):
                                 altura,
                                 str(produto.ncm), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm, posicao_y,
-                                self.largura_cst_un, altura, f_cst((icms.origem * 100) + icms.cst), fonte, 'T', 'R', borda=False, forcar=True)
+                                self.largura_cst_un, altura, f_cst((origem * 100) + cst), fonte, 'T', 'R', borda=False, forcar=True)
             self.caixa_de_texto(
                 self.x + self.largura_codigo + self.largura_descricao + self.largura_barras + self.largura_ncm + self.largura_cst_un,
                 posicao_y, self.largura_cfop_aliq, altura, str(produto.cfop), fonte, 'T', 'R', borda=False, forcar=True)
