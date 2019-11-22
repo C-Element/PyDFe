@@ -490,10 +490,10 @@ class DANFeNFe(DFePDF):
         self.caixa_de_texto(self.x + largura_menor_ult + largura_menor, posicao_y, largura_menor, 6, marca, fonte, 'B', borda=False)
         self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 2, posicao_y, largura_menor, 6, numero, fonte, 'B', 'R',
                             borda=False)
-        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(peso_liq), fonte, 'B',
+        self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 3, posicao_y, largura_menor, 6, f_dec_milhar(peso_bruto), fonte, 'B',
                             'R', borda=False)
         posicao_y += self.caixa_de_texto(self.x + largura_menor_ult + largura_menor * 4, posicao_y, largura_menor, 6,
-                                         f_dec_milhar(peso_bruto), fonte, 'B', 'R',
+                                         f_dec_milhar(peso_liq), fonte, 'B', 'R',
                                          borda=False)
         return posicao_y
 
