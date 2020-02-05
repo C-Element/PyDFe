@@ -61,7 +61,7 @@ class NFe(object):
                 self.dado_qrcode = valor
 
     def gerar_pdf(self, caminho: str):
-        if self.infNFe.ide and self.infNFe.ide.modelo == 55:
+        if self.infNFe.ide and self.infNFe.ide.modelo == '55':
             danfe = DANFeNFe(self)
         else:
             danfe = DANFeNFCe(self)
@@ -70,7 +70,7 @@ class NFe(object):
         danfe.output(caminho, 'F')
 
     def gerar_pdf_stream(self) -> bytes:
-        if self.infNFe.ide and self.infNFe.ide.modelo == 55:
+        if self.infNFe.ide and self.infNFe.ide.modelo == '55':
             danfe = DANFeNFe(self)
         else:
             danfe = DANFeNFCe(self)
