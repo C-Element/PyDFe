@@ -354,7 +354,7 @@ class Duplicata(BaseObjDFe):  # [#Y07]
 class ECFReferenciado(BaseObjDFe):  # [#BA20]
 
     def __init__(self, dado: OrderedDict):
-        self.modelo: int = int()  # Modelo do cupom fiscal :: <mod> [#BA21]
+        self.modelo: str = ''  # Modelo do cupom fiscal :: <mod> [#BA21]
         self.numero_coo: int = int()  # Número do Contador de Ordem de Operação - COO :: <nCOO> [#BA23]
         self.numero_ecf: int = int()  # Número de ordem sequencial do ECF :: <nECF> [#BA22]
         super().__init__(dado)
@@ -362,7 +362,7 @@ class ECFReferenciado(BaseObjDFe):  # [#BA20]
     def _preencher(self):
         for chave, valor in self._conteudo_xml.items():
             if chave == 'mod':
-                self.modelo = ler_inteiro(valor)
+                self.modelo = valor
             elif chave == 'nCOO':
                 self.numero_coo = ler_inteiro(valor)
             elif chave == 'nECF':
@@ -824,7 +824,7 @@ class IDe(BaseObjDFe):  # [#B01]
         # 1=Operação presencial; 2=Operação não presencial, pela Internet; 3=Operação não presencial, Teleatendimento; 4=NFC-e em operação com entrega a
         # domicílio; 9=Operação não presencial,  outros. :: <indPres> [#B25b]
         self.modalidade: int = 1  # Modalidade do transporte. 1 - Rodoviário; 2 - Aéreo; 3 - Aquaviário; 4 - Ferroviário.  :: <modal>
-        self.modelo: int = 55  # Código do Modelo do DFe. 55=NFe; 65=NFCe; 58=MDFe :: <mod> [#B06]
+        self.modelo: str = '55'  # Código do Modelo do DFe. 55=NFe; 65=NFCe; 58=MDFe :: <mod> [#B06]
         self.municipio: int = int()  # Código do Município de Ocorrência <cMunFG> [#B12]
         self.municipios_carregamentos: ListaMunicipiosCarregamento = []  # Informações dos Municípios de Carregamento :: <infMunCarrega>
         self.natureza_operacao: str = str()  # Descrição da Natureza da Operação :: <natOp> [#B04]
@@ -891,7 +891,7 @@ class IDe(BaseObjDFe):  # [#B01]
                 else:
                     self.municipios_carregamentos.append(MunicipioCarregamento(valor))
             elif chave == 'mod':
-                self.modelo = ler_inteiro(valor)
+                self.modelo = valor
             elif chave == 'modal':
                 self.modalidade = ler_inteiro(valor)
             elif chave == 'cMunFG':
@@ -1267,7 +1267,7 @@ class NFeReferenciada(BaseObjDFe):  # [#BA03]
     def __init__(self, dado: OrderedDict):
         self.cnpj: int = int()  # CNPJ do Emitente. :: <CNPJ> [#BA06]
         self.emissao: date = None  # Ano e Mês da emissão no formato AAMM :: <AAMM> [#BA05]
-        self.modelo: int = int()  # Modelo do documento fiscal :: <mod> [#BA07]
+        self.modelo: str = ''  # Modelo do documento fiscal :: <mod> [#BA07]
         self.nf: int = int()  # Número do documento fiscal :: <nNF> [#BA09]
         self.serie: int = int()  # Série do documento fiscal :: <serie> [#BA08]
         self.uf: str = str()  # Código da UF do emitente :: <cUF> [#BA04]
@@ -1283,7 +1283,7 @@ class NFeReferenciada(BaseObjDFe):  # [#BA03]
                 except:
                     self.emissao = ler_data(valor, '%y%m')
             elif chave == 'mod':
-                self.modelo = ler_inteiro(valor)
+                self.modelo = valor
             elif chave == 'nNF':
                 self.nf = ler_inteiro(valor)
             elif chave == 'serie':
